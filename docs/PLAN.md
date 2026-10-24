@@ -119,15 +119,15 @@ The model sees six tools: `get_claim`, `get_policy`, `get_claim_history`, `get_p
 
 **Success criteria**
 
-- [ ] Tests cover every transition and every refusal: deciding a claim that isn't in progress (409), a decline or refer with a payout other than 0 (422), an unknown outcome (422), paying without an approval (409), paying a different amount from the approved payout (409), paying twice (409), paying over the limit before sign-off (403), signing off a claim that isn't waiting for sign-off (409) and an unknown handler (404).
-- [ ] On a freshly seeded database, these API calls give these responses:
-  - [ ] `start_claim` CLM-1001, `decide_claim` approve $420.00, `pay_claim` $420.00: 200, and the claim is `decided` with a payment of $420.00 and no sign-off.
-  - [ ] `start_claim` CLM-1002, `decide_claim` approve $1,150.00: the claim is `waiting_for_sign_off`.
-  - [ ] `pay_claim` CLM-1002 $1,150.00: 403 with "A payout over $1,000.00 needs a handler's sign-off.", and `get_claim` shows no payment.
-  - [ ] `sign_off_claim` CLM-1002 by HND-01: the claim is `decided`, paid $1,150.00, signed off by Dana Whitfield.
-  - [ ] `pay_claim` CLM-1002 again: 409, already paid.
-- [ ] `uv run -m backend.seed` puts every claim back to `waiting`.
-- [ ] `npm run check:python` passes with coverage at 80% or more.
+- [x] Tests cover every transition and every refusal: deciding a claim that isn't in progress (409), a decline or refer with a payout other than 0 (422), an unknown outcome (422), paying without an approval (409), paying a different amount from the approved payout (409), paying twice (409), paying over the limit before sign-off (403), signing off a claim that isn't waiting for sign-off (409) and an unknown handler (404).
+- [x] On a freshly seeded database, these API calls give these responses:
+  - [x] `start_claim` CLM-1001, `decide_claim` approve $420.00, `pay_claim` $420.00: 200, and the claim is `decided` with a payment of $420.00 and no sign-off.
+  - [x] `start_claim` CLM-1002, `decide_claim` approve $1,150.00: the claim is `waiting_for_sign_off`.
+  - [x] `pay_claim` CLM-1002 $1,150.00: 403 with "A payout over $1,000.00 needs a handler's sign-off.", and `get_claim` shows no payment.
+  - [x] `sign_off_claim` CLM-1002 by HND-01: the claim is `decided`, paid $1,150.00, signed off by Dana Whitfield.
+  - [x] `pay_claim` CLM-1002 again: 409, already paid.
+- [x] `uv run -m backend.seed` puts every claim back to `waiting`.
+- [x] `npm run check:python` passes with coverage at 80% or more.
 
 ## Phase 3: The UnderCover Agent
 

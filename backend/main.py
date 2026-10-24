@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from backend import claims, records
+from backend import claims, lifecycle, records
 from backend.db import db_path
 from backend.seed import seed
 
@@ -20,6 +20,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="UnderCover", lifespan=lifespan)
 app.include_router(claims.router)
+app.include_router(lifecycle.router)
 app.include_router(records.router)
 
 

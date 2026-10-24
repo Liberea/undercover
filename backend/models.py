@@ -1,11 +1,37 @@
 """The shapes of the UnderCover API's requests and responses."""
 
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
 Status = Literal["waiting", "in_progress", "waiting_for_sign_off", "decided"]
 Outcome = Literal["approve", "decline", "refer"]
+
+
+class StartIn(BaseModel):
+    thread_id: str
+
+
+class DecisionIn(BaseModel):
+    outcome: Outcome
+    payout: float = Field(ge=0, description="0 unless the outcome is approve")
+    reasons: str = Field(description="Two or three sentences")
+    policy_section: str = Field(description="The policy wording section it rests on")
+
+    @model_validator(mode="after")
+    def only_approvals_pay(self) -> Self:
+        """Reject a payout on a decline or a referral."""
+        if self.outcome != "approve" and self.payout != 0:
+            raise ValueError("Only an approval has a payout")
+        return self
+
+
+class PaymentIn(BaseModel):
+    amount: float = Field(gt=0)
+
+
+class SignOffIn(BaseModel):
+    handler_id: str
 
 
 class Item(BaseModel):
