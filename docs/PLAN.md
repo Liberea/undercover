@@ -143,16 +143,16 @@ The model sees six tools: `get_claim`, `get_policy`, `get_claim_history`, `get_p
 
 **Success criteria**
 
-- [ ] `uv run pytest agent` passes, with a stub model, for these runs:
-  - [ ] An approval under the limit: the stub reads CLM-1001, decides approve $420.00 and pays. The claim is `decided`, paid, and its steps list each tool call, each result and the final reply in order.
-  - [ ] An approval over the limit where the agent tries to pay anyway: the `pay_claim` tool returns the backend's refusal as text, nothing is paid, and the claim is `waiting_for_sign_off`.
-  - [ ] A run that ends without a decision: the claim is back to `waiting`, and the last step says the run ended without a decision.
-  - [ ] A run where the model raises an error: the claim is back to `waiting`, the error is a step, and the error is raised again.
-  - [ ] The model receives the text from `GET /api/instructions` as its system prompt.
-- [ ] A backend test checks that `run_agent` returns 202 with a thread id and starts the run (with the run replaced by a stub).
-- [ ] The existing test of the model name still passes: GPT-6 Luna by default, `MODEL_NAME` when it's set.
-- [ ] One real run, with the backend running: `uv run -m agent CLM-1001` prints the agent's reply, `GET /api/claims/CLM-1001` shows a decision with an outcome, a payout, two or three sentences of reasons and a policy section, and `GET /api/claims/CLM-1001/steps` lists the steps. This uses the model in `MODEL_NAME` if it's set, otherwise GPT-6 Luna, and costs a cent or two at most. Then `uv run -m backend.seed` resets the database.
-- [ ] `npm run check:python` passes with coverage at 80% or more.
+- [x] `uv run pytest agent` passes, with a stub model, for these runs:
+  - [x] An approval under the limit: the stub reads CLM-1001, decides approve $420.00 and pays. The claim is `decided`, paid, and its steps list each tool call, each result and the final reply in order.
+  - [x] An approval over the limit where the agent tries to pay anyway: the `pay_claim` tool returns the backend's refusal as text, nothing is paid, and the claim is `waiting_for_sign_off`.
+  - [x] A run that ends without a decision: the claim is back to `waiting`, and the last step says the run ended without a decision.
+  - [x] A run where the model raises an error: the claim is back to `waiting`, the error is a step, and the error is raised again.
+  - [x] The model receives the text from `GET /api/instructions` as its system prompt.
+- [x] A backend test checks that `run_agent` returns 202 with a thread id and starts the run (with the run replaced by a stub).
+- [x] The existing test of the model name still passes: GPT-6 Luna by default, `MODEL_NAME` when it's set.
+- [x] One real run, with the backend running: `uv run -m agent CLM-1001` prints the agent's reply, `GET /api/claims/CLM-1001` shows a decision with an outcome, a payout, two or three sentences of reasons and a policy section, and `GET /api/claims/CLM-1001/steps` lists the steps. This uses the model in `MODEL_NAME` if it's set, otherwise GPT-6 Luna, and costs a cent or two at most. Then `uv run -m backend.seed` resets the database.
+- [x] `npm run check:python` passes with coverage at 80% or more.
 
 ## Phase 4: The dashboard's look and the queue
 

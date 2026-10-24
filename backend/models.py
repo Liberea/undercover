@@ -34,6 +34,24 @@ class SignOffIn(BaseModel):
     handler_id: str
 
 
+StepKind = Literal["tool_call", "tool_result", "reply", "error"]
+
+
+class StepIn(BaseModel):
+    thread_id: str
+    kind: StepKind
+    text: str
+
+
+class Step(StepIn):
+    step_id: int
+    created_at: str
+
+
+class AgentRun(BaseModel):
+    thread_id: str
+
+
 class Item(BaseModel):
     description: str
     category: str

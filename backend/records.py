@@ -11,6 +11,7 @@ from backend.models import ClaimHistory, Handler, Policy, Text
 router = APIRouter(prefix="/api")
 
 POLICY_WORDING = Path(__file__).parent.parent / "data" / "policy_wording.md"
+INSTRUCTIONS = Path(__file__).parent / "instructions.md"
 
 
 @router.get("/policies/{policy_id}", operation_id="get_policy")
@@ -46,3 +47,9 @@ def list_handlers(db: Db) -> list[Handler]:
 def get_policy_wording() -> Text:
     """Get the policy wording that decisions follow."""
     return Text(text=POLICY_WORDING.read_text(encoding="utf-8"))
+
+
+@router.get("/instructions", operation_id="get_instructions")
+def get_instructions() -> Text:
+    """Get the UnderCover Agent's instructions."""
+    return Text(text=INSTRUCTIONS.read_text(encoding="utf-8"))
