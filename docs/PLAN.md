@@ -198,11 +198,11 @@ The model sees six tools: `get_claim`, `get_policy`, `get_claim_history`, `get_p
 
 **Success criteria**
 
-- [ ] With `npm run dev` running, in the browser with the Playwright MCP server: on CLM-1001 I click **Run the agent**; the status goes to in progress, the steps appear one by one while the agent works, and then the decision appears with its reasons and policy section, and the payment if it approved.
-- [ ] I run the agent the same way on CLM-1003 ($3,800 claimed) and CLM-1016 ($6,200 claimed). Where it approves more than $1,000, the claim waits for sign-off with nothing paid, the queue shows it in Alert, and signing off pays it.
-- [ ] `docs/STATUS.md` describes what's built and how to run it: `npm run dev`, the dashboard's address, `uv run -m agent`, and `uv run -m backend.seed` to start over.
-- [ ] `uv run -m backend.seed` leaves the dev database fresh for the student.
-- [ ] `npm run check` passes in full: ruff, pyright, pytest, Prettier, ESLint, tsc, Vitest and Playwright.
+- [x] With `npm run dev` running, in the browser with the Playwright MCP server: on CLM-1001 I click **Run the agent**; the status goes to in progress, the steps appear one by one while the agent works, and then the decision appears with its reasons and policy section, and the payment if it approved.
+- [x] I run the agent the same way on CLM-1003 ($3,800 claimed) and CLM-1016 ($6,200 claimed). Where it approves more than $1,000, the claim waits for sign-off with nothing paid, the queue shows it in Alert, and signing off pays it.
+- [x] `docs/STATUS.md` describes what's built and how to run it: `npm run dev`, the dashboard's address, `uv run -m agent`, and `uv run -m backend.seed` to start over.
+- [x] `uv run -m backend.seed` leaves the dev database fresh for the student.
+- [x] `npm run check` passes in full: ruff, pyright, pytest, Prettier, ESLint, tsc, Vitest and Playwright.
 
 ## Not in this plan
 
