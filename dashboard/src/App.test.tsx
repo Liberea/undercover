@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { App } from "./App";
-import { stubApi } from "./testing";
+import { claim, stubApi } from "./testing";
 
 afterEach(() => {
   cleanup();
@@ -33,11 +33,24 @@ it("opens on the claims queue", async () => {
   expect(queue.getAttribute("aria-current")).toBe("page");
 });
 
-it("follows the URL to a claim's page", () => {
-  stubApi({ "GET /api/claims": [] });
+it("follows the URL to a claim's page within the queue", async () => {
+  stubApi({ "GET /api/claims/CLM-1001": claim({}) });
   render(<App />);
   goTo("#/claims/CLM-1001");
-  expect(screen.getByRole("heading", { name: "CLM-1001" })).toBeDefined();
+  expect(
+    await screen.findByRole("heading", { name: "CLM-1001" }),
+  ).toBeDefined();
+  const queue = screen.getByRole("link", { name: "Queue" });
+  expect(queue.getAttribute("aria-current")).toBe("page");
+});
+
+it("follows the URL to the instructions", async () => {
+  stubApi({ "GET /api/instructions": { text: "You are the agent." } });
+  render(<App />);
+  goTo("#/instructions");
+  expect(await screen.findByText("You are the agent.")).toBeDefined();
+  const link = screen.getByRole("link", { name: "Instructions" });
+  expect(link.getAttribute("aria-current")).toBe("page");
 });
 
 it("switches between dark and light mode and remembers it", () => {

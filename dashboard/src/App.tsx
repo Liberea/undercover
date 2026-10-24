@@ -1,12 +1,14 @@
 import { ClaimPage } from "./ClaimPage";
 import { useRoute, useTheme, type Route } from "./hooks";
+import { Instructions } from "./Instructions";
 import { Queue } from "./Queue";
 
 export function App() {
   const route = useRoute();
   const [theme, toggleTheme] = useTheme();
+  const section = route.view === "instructions" ? "instructions" : "queue";
   const current = (view: Route["view"]) =>
-    route.view === view ? "page" : undefined;
+    section === view ? "page" : undefined;
   return (
     <div className="page">
       <header className="topbar">
@@ -38,5 +40,6 @@ export function App() {
 
 function View({ route }: Readonly<{ route: Route }>) {
   if (route.view === "claim") return <ClaimPage claimId={route.claimId} />;
+  if (route.view === "instructions") return <Instructions />;
   return <Queue />;
 }

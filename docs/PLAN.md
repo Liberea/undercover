@@ -186,11 +186,11 @@ The model sees six tools: `get_claim`, `get_policy`, `get_claim_history`, `get_p
 
 **Success criteria**
 
-- [ ] Vitest tests pass for the claim view (the decision, the payment states, the steps, the run button's request, and the sign-off request with the chosen handler) and for the instructions view.
-- [ ] `npm run e2e` passes a test that plays the agent through the API, with no model: it starts CLM-1002 and posts steps, and the page shows them while the claim is in progress; it decides approve $1,150.00 and tries to pay, and the page shows "Waiting for sign-off" and no payment; it picks Dana Whitfield and signs off, and the page shows the claim decided and paid $1,150.00, signed off by Dana Whitfield.
-- [ ] `npm run e2e` passes a test that the instructions view shows the instructions from the API and has no text field to edit them.
-- [ ] In the browser, with the Playwright MCP server: the claim view for CLM-1001 renders in dark and light mode, every section is there, and the page has no horizontal scroll at 1280 px. I take a screenshot of each mode.
-- [ ] `npm run check:ts` passes with coverage at 80% or more.
+- [x] Vitest tests pass for the claim view (the decision, the payment states, the steps, the run button's request, and the sign-off request with the chosen handler) and for the instructions view.
+- [x] `npm run e2e` passes a test that plays the agent through the API, with no model: it starts CLM-1002 and posts steps, and the page shows them while the claim is in progress; it decides approve $1,150.00 and tries to pay, and the page shows "Waiting for sign-off" and no payment; it picks Dana Whitfield and signs off, and the page shows the claim decided and paid $1,150.00, signed off by Dana Whitfield.
+- [x] `npm run e2e` passes a test that the instructions view shows the instructions from the API and has no text field to edit them.
+- [x] In the browser, with the Playwright MCP server: the claim view for CLM-1001 renders in dark and light mode, every section is there, and the page has no horizontal scroll at 1280 px. I take a screenshot of each mode.
+- [x] `npm run check:ts` passes with coverage at 80% or more.
 
 ## Phase 6: The pilot end to end with the real agent
 

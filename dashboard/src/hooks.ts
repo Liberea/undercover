@@ -31,8 +31,11 @@ export interface Polled<T> {
   failed: boolean;
 }
 
-/** Load data now and again every `everyMs`; `load` must keep its identity. */
-export function usePolling<T>(load: () => Promise<T>, everyMs: number) {
+/**
+ * Load data now and again every `everyMs`, or only once when it's null.
+ * `load` must keep its identity between renders.
+ */
+export function usePolling<T>(load: () => Promise<T>, everyMs: number | null) {
   const [polled, setPolled] = useState<Polled<T>>({
     data: undefined,
     failed: false,
@@ -50,7 +53,7 @@ export function usePolling<T>(load: () => Promise<T>, everyMs: number) {
       );
     };
     tick();
-    const timer = setInterval(tick, everyMs);
+    const timer = everyMs === null ? undefined : setInterval(tick, everyMs);
     return () => {
       active = false;
       clearInterval(timer);

@@ -17,6 +17,8 @@
   --info: #5fb8d6;
   --alert: #ef6b7f;
   --secondary: #39373d;
+  --pill: rgba(255, 255, 255, 0.06);
+  --pill-line: transparent;
   --shadow:
     0 10px 24px rgba(0, 0, 0, 0.23), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --gradient: linear-gradient(135deg in oklch, #af5c2c 0%, #3846e5 100%);
@@ -43,6 +45,9 @@
   --info: #1f6f8b;
   --alert: #c0304a;
   --shadow: 0 10px 24px rgba(14, 9, 24, 0.06);
+  /* Brand colors on light reach 4.5:1 only on white. */
+  --pill: #ffffff;
+  --pill-line: rgba(14, 9, 24, 0.12);
 }
 
 *,
@@ -286,9 +291,10 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 10px;
+  padding: 1px 10px;
+  border: 1px solid var(--pill-line);
   border-radius: 999px;
-  background: var(--raise-2);
+  background: var(--pill);
   font-size: 13px;
   white-space: nowrap;
 }
@@ -332,4 +338,275 @@ tbody tr:hover {
 .notice {
   margin: 24px 0;
   color: var(--alert);
+}
+
+/* A claim */
+
+.back {
+  margin: 32px 0 12px;
+  font-size: 15px;
+}
+
+.claim-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.claim-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.run-agent {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.lede {
+  margin: 8px 0 20px;
+  color: var(--heading);
+  font-size: 18px;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 36px;
+  margin: 0 0 28px;
+  font-size: 15px;
+}
+
+.facts dt,
+.pairs dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.facts dd,
+.pairs dd {
+  margin: 0;
+}
+
+.claim-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.stack {
+  display: grid;
+  gap: 20px;
+}
+
+.section {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+}
+
+.section table {
+  font-size: 15px;
+}
+
+.section th,
+.section td {
+  padding: 10px 0;
+}
+
+.section th + th,
+.section td + td {
+  padding-left: 16px;
+}
+
+.decision-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+.key-figure {
+  color: var(--heading);
+  font-size: 28px;
+}
+
+.payment {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.payment-held {
+  color: var(--alert);
+}
+
+.sign-off {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+
+.sign-off label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+select {
+  min-width: 220px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--input);
+  color: var(--body);
+  font: inherit;
+  font-size: 15px;
+}
+
+.error {
+  color: var(--alert);
+  font-size: 15px;
+}
+
+.documents {
+  display: grid;
+  gap: 8px;
+}
+
+details {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--raise-1);
+}
+
+summary {
+  cursor: pointer;
+}
+
+details p {
+  margin-top: 8px;
+}
+
+pre {
+  margin: 8px 0 0;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.records {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.pairs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+  font-size: 15px;
+}
+
+.history {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+
+/* The agent's activity */
+
+.activity {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.step {
+  display: grid;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+
+.step details {
+  padding: 6px 10px;
+}
+
+.step pre {
+  max-height: 240px;
+}
+
+.step-kind {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.step-error .step-kind,
+.step-error p {
+  color: var(--alert);
+}
+
+.working {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mid);
+  font-size: 15px;
+}
+
+/* The instructions */
+
+.page-head {
+  display: grid;
+  gap: 6px;
+  margin: 40px 0 20px;
+}
+
+.instructions {
+  margin: 0;
+  padding: 24px;
+  color: var(--body);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 960px) {
+  .claim-grid,
+  .records {
+    grid-template-columns: 1fr;
+  }
+
+  .activity {
+    position: static;
+    max-height: none;
+  }
+}
+
+.small {
+  font-size: 15px;
 }

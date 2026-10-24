@@ -102,6 +102,11 @@ export interface Step {
   created_at: string;
 }
 
+/** The message of a failed request, to show to the handler. */
+export function message(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init);
   if (!response.ok) {
