@@ -85,7 +85,7 @@ def pay_claim(claim_id: str, body: PaymentIn, db: Db) -> Claim:
             409,
             f"The approved payout is ${row['payout']:,.2f}, not ${body.amount:,.2f}",
         )
-    if body.amount > APPROVAL_LIMIT:
+    if row["payout"] > APPROVAL_LIMIT:
         raise HTTPException(
             403, f"A payout over ${APPROVAL_LIMIT:,.2f} needs a handler's sign-off."
         )

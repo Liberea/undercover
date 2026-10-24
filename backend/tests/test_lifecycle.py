@@ -90,6 +90,15 @@ def test_sign_off_pays(client):
     assert response.json() == {"detail": "Claim CLM-1002 is already paid"}
 
 
+def test_payout_just_over_the_limit_cannot_be_paid_rounded_down(client):
+    assert approved(client, "CLM-1002", 1000.004).json()["status"] == (
+        "waiting_for_sign_off"
+    )
+    response = pay(client, "CLM-1002", 1000)
+    assert response.status_code == 403
+    assert response.json() == {"detail": LIMIT_MESSAGE}
+
+
 def test_payout_at_the_limit_needs_no_sign_off(client):
     assert approved(client, "CLM-1002", 1000).json()["status"] == "decided"
     assert pay(client, "CLM-1002", 1000).status_code == 200
