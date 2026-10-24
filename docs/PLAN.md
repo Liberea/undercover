@@ -168,11 +168,11 @@ The model sees six tools: `get_claim`, `get_policy`, `get_claim_history`, `get_p
 
 **Success criteria**
 
-- [ ] Vitest tests pass for the queue (rows, counts and status labels from a stubbed API), the money format and the theme switch.
-- [ ] `npm run e2e` passes: the queue shows 25 claims, all waiting, and clicking CLM-1001 opens `#/claims/CLM-1001`.
-- [ ] `npm run e2e` passes twice in a row, and running it while `npm run dev` is up leaves the dev database unchanged (`GET http://localhost:8000/api/claims` is the same before and after).
-- [ ] In the browser, with the Playwright MCP server at `http://localhost:5173`: the queue renders in dark and in light mode; the computed fonts are Geist for text and Geist Mono for ids and amounts; headings have weight 400; the page has no horizontal scroll at 1280 px wide. I take a screenshot of each mode.
-- [ ] `npm run check:ts` passes: Prettier, ESLint, strict `tsc` with no `any`, and Vitest with coverage at 80% or more.
+- [x] Vitest tests pass for the queue (rows, counts and status labels from a stubbed API), the money format and the theme switch.
+- [x] `npm run e2e` passes: the queue shows 25 claims, all waiting, and clicking CLM-1001 opens `#/claims/CLM-1001`.
+- [x] `npm run e2e` passes twice in a row, and running it while `npm run dev` is up leaves the dev database unchanged (`GET http://localhost:8000/api/claims` is the same before and after).
+- [x] In the browser, with the Playwright MCP server at `http://localhost:5173`: the queue renders in dark and in light mode; the computed fonts are Geist for text and Geist Mono for ids and amounts; headings have weight 400; the page has no horizontal scroll at 1280 px wide. I take a screenshot of each mode.
+- [x] `npm run check:ts` passes: Prettier, ESLint, strict `tsc` with no `any`, and Vitest with coverage at 80% or more.
 
 ## Phase 5: The claim, the agent's work, sign-off and the instructions
 

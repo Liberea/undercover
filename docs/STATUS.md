@@ -1,6 +1,6 @@
 # Status
 
-The claims pilot is being built from `docs/PLAN.md`. Done so far: phases 1 to 3.
+The claims pilot is being built from `docs/PLAN.md`. Done so far: phases 1 to 4.
 
 ## Built
 
@@ -10,9 +10,9 @@ The claims pilot is being built from `docs/PLAN.md`. Done so far: phases 1 to 3.
   - `pay_claim` refuses a payout over $1,000.00 (403) until a handler signs off; `sign_off_claim` then pays it. The limit comes from `data/company.json`.
   - `add_step` and `list_steps` hold what the agent did on a claim; `run_agent` starts the agent on a waiting claim in the background.
   - The agent's instructions are `backend/instructions.md`.
-- `agent/`: the UnderCover Agent, `run(claim_id, thread_id)`, on `create_agent` with GPT-6 Luna (low reasoning) or the model in `MODEL_NAME`. Its six tools (`agent/tools.py`) each call one API operation and hand the backend's refusals back to the model as text. It records every step through the API, and a run that fails or ends without a decision puts the claim back in the queue.
-- `dashboard/`: still the skeleton page that shows whether the backend is up.
-- `e2e/`: one test of that page.
+- `agent/`: the UnderCover Agent, `run(claim_id, thread_id)`, on `create_agent` with GPT-6 Luna (low reasoning) or the model in `MODEL_NAME`. Its six tools (`agent/tools.py`) each call one API operation, are bound to the run's claim so the model passes no ids, and hand the backend's refusals back to the model as text. It records every step through the API, and a run that fails or ends without a decision puts the claim back in the queue.
+- `dashboard/`: React and Vite in the brand's look, dark by default with a light mode switch. The claims queue shows how many claims are in each state and every claim with its status and decision, refreshed every two seconds. A claim's page shows only its id so far.
+- `e2e/`: Playwright tests of the queue. They start their own backend on port 8100 with a fresh database (`e2e/e2e.db`) and their own dashboard on port 5180, so they never touch the dev data.
 
 ## Run it
 
