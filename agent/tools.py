@@ -1,28 +1,16 @@
-"""The agent's tools, one for each API operation it may use."""
+"""The agent's tools, one for each API operation it may use, bound to one claim."""
 
 from typing import Literal
 from urllib.parse import quote
 
 from langchain_core.tools import BaseTool, tool
 
-from agent.api import request, tool_reply
+from agent.api import call, request, tool_reply
 
 
 def path(*parts: str) -> str:
     """Build an API path, escaping each part so an id can't add segments or a query."""
     return "/api/" + "/".join(quote(part, safe="") for part in parts)
-
-
-@tool
-def get_policy(policy_id: str) -> str:
-    """Get a policy: the plan, the add-ons, the covered trip and the travelers."""
-    return tool_reply(request("GET", path("policies", policy_id), None))
-
-
-@tool
-def get_claim_history(customer_id: str) -> str:
-    """Get the customer's earlier claims."""
-    return tool_reply(request("GET", path("customers", customer_id, "claims"), None))
 
 
 @tool
@@ -32,12 +20,29 @@ def get_policy_wording() -> str:
 
 
 def tools_for(claim_id: str) -> list[BaseTool]:
-    """Return the agent's tools, with the claim's own tools bound to this claim."""
+    """Return the agent's tools, bound to this claim, its policy and its customer.
+
+    The model passes no ids, so nothing in a claim can steer it to another record.
+    """
+    claim = call("GET", path("claims", claim_id), None)
 
     @tool
     def get_claim() -> str:
         """Get the claim in full: the story, the items claimed and the documents."""
         return tool_reply(request("GET", path("claims", claim_id), None))
+
+    @tool
+    def get_policy() -> str:
+        """Get the claim's policy: the plan, the add-ons, the trip and the travelers."""
+        return tool_reply(request("GET", path("policies", claim["policy_id"]), None))
+
+    @tool
+    def get_claim_history() -> str:
+        """Get the customer's earlier claims."""
+        customer_id = claim["customer_id"]
+        return tool_reply(
+            request("GET", path("customers", customer_id, "claims"), None)
+        )
 
     @tool
     def decide_claim(

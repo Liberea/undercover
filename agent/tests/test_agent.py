@@ -50,8 +50,8 @@ def steps(client, claim_id):
 def test_approve_under_the_limit_and_pay(client):
     model = stub(
         call("get_claim"),
-        call("get_policy", policy_id="POL-2001"),
-        call("get_claim_history", customer_id="CUS-3001"),
+        call("get_policy"),
+        call("get_claim_history"),
         call("get_policy_wording"),
         decide("approve", 420),
         call("pay_claim", amount=420),
