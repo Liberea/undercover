@@ -13,7 +13,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
 from agent.api import call
-from agent.tools import TOOLS
+from agent.tools import tools_for
 
 load_dotenv(override=True)
 
@@ -63,7 +63,9 @@ def work(
     claim_id: str, thread_id: str, llm: BaseChatModel | None, instructions: str
 ) -> str:
     """Stream the agent on the claim, recording each step, and return its reply."""
-    agent = create_agent(llm or model(), tools=TOOLS, system_prompt=instructions)
+    agent = create_agent(
+        llm or model(), tools=tools_for(claim_id), system_prompt=instructions
+    )
     updates = agent.stream(
         {"messages": [{"role": "user", "content": f"Decide claim {claim_id}."}]},
         config={"configurable": {"thread_id": thread_id}},

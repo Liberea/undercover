@@ -33,10 +33,9 @@ def call(name, **args):
     )
 
 
-def decide(claim_id, outcome, payout):
+def decide(outcome, payout):
     return call(
         "decide_claim",
-        claim_id=claim_id,
         outcome=outcome,
         payout=payout,
         reasons="The delay is covered.",
@@ -50,12 +49,12 @@ def steps(client, claim_id):
 
 def test_approve_under_the_limit_and_pay(client):
     model = stub(
-        call("get_claim", claim_id="CLM-1001"),
+        call("get_claim"),
         call("get_policy", policy_id="POL-2001"),
         call("get_claim_history", customer_id="CUS-3001"),
         call("get_policy_wording"),
-        decide("CLM-1001", "approve", 420),
-        call("pay_claim", claim_id="CLM-1001", amount=420),
+        decide("approve", 420),
+        call("pay_claim", amount=420),
         AIMessage(content="Approved and paid $420.00."),
     )
     assert main.run("CLM-1001", "t-1", model) == "Approved and paid $420.00."
@@ -65,7 +64,7 @@ def test_approve_under_the_limit_and_pay(client):
     assert claim["decision"]["payment"]["amount"] == 420
     taken = steps(client, "CLM-1001")
     assert [s["kind"] for s in taken] == ["tool_call", "tool_result"] * 6 + ["reply"]
-    assert taken[0]["text"] == 'get_claim({"claim_id": "CLM-1001"})'
+    assert taken[0]["text"] == "get_claim({})"
     assert taken[1]["text"].startswith('get_claim: {"claim_id":"CLM-1001"')
     assert taken[-1]["text"] == "Approved and paid $420.00."
     assert {s["thread_id"] for s in taken} == {"t-1"}
@@ -73,9 +72,9 @@ def test_approve_under_the_limit_and_pay(client):
 
 def test_payment_over_the_limit_is_held_even_if_the_agent_pays(client):
     model = stub(
-        call("get_claim", claim_id="CLM-1002"),
-        decide("CLM-1002", "approve", 1150),
-        call("pay_claim", claim_id="CLM-1002", amount=1150),
+        call("get_claim"),
+        decide("approve", 1150),
+        call("pay_claim", amount=1150),
         AIMessage(content="Approved; the payment waits for a sign-off."),
     )
     main.run("CLM-1002", "t-2", model)
@@ -89,7 +88,7 @@ def test_payment_over_the_limit_is_held_even_if_the_agent_pays(client):
 
 def test_run_without_a_decision_goes_back_to_the_queue(client):
     model = stub(
-        call("get_claim", claim_id="CLM-1001"),
+        call("get_claim"),
         AIMessage(content="I cannot decide this claim."),
     )
     main.run("CLM-1001", "t-3", model)
