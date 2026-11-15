@@ -209,5 +209,6 @@ def test_each_agent_gets_its_own_instructions(client, claim_models, monkeypatch)
     assert prompts == [instructions["queue"], instructions["claim"]]
 
 
-def test_the_model_call_limit_grows_with_the_cap():
+def test_the_model_call_limit_grows_with_the_claims_the_run_can_work(client):
     assert queue.model_call_limit(5) == 30
+    assert queue.model_call_limit(1_000_000) == 4 * 25 + 10

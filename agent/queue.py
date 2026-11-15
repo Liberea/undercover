@@ -34,8 +34,9 @@ def waiting_claims() -> list[dict[str, Any]]:
 
 
 def model_call_limit(cap: int) -> int:
-    """Allow a few model calls for each claim, and some to plan and sum up."""
-    return 4 * cap + 10
+    """Allow a few model calls for each claim the run can work, and some to plan
+    and sum up. A cap above the waiting claims raises no limit."""
+    return 4 * min(cap, len(waiting_claims())) + 10
 
 
 def missed(taken: set[str], cap: int) -> list[str]:
