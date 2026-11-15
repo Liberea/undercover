@@ -1,12 +1,11 @@
 """Moving a claim through its states: start, decide, pay and sign off."""
 
 import sqlite3
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException
 
 from backend.claims import claim, find_claim
-from backend.db import Db
+from backend.db import Db, now
 from backend.models import Claim, DecisionIn, PaymentIn, SignOffIn, StartIn
 from backend.seed import load
 
@@ -14,11 +13,6 @@ router = APIRouter(prefix="/api/claims")
 
 APPROVAL_LIMIT: float = load("company.json")["payout_approval_limit"]
 FAILURES_FOR_A_HANDLER = 2
-
-
-def now() -> str:
-    """Return the current time in UTC, to the second."""
-    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def require_status(row: sqlite3.Row, *allowed: str) -> None:

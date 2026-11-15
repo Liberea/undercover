@@ -1,15 +1,14 @@
 """The policy wording and the claims manual, section by section."""
 
 import re
-from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
 from backend.models import Section, SectionHeading
+from backend.seed import DATA
 
 router = APIRouter(prefix="/api/documents")
 
-DATA = Path(__file__).parent.parent / "data"
 DOCUMENTS = {"policy_wording": "policy_wording.md", "claims_manual": "claims_manual.md"}
 TOPIC = re.compile(r"^(?:- )?\*\*(.+?)[.:]\*\*", re.MULTILINE)
 

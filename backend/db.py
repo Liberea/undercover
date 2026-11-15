@@ -1,9 +1,11 @@
-"""The UnderCover database: a SQLite file, one connection per request."""
+"""The UnderCover database: a SQLite file, one connection per request, and the
+time stamps it stores."""
 
 import os
 import sqlite3
 from collections.abc import Iterator
 from contextlib import closing
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -74,3 +76,8 @@ def get_db() -> Iterator[sqlite3.Connection]:
 
 
 Db = Annotated[sqlite3.Connection, Depends(get_db)]
+
+
+def now() -> str:
+    """Return the current time in UTC, to the second."""
+    return datetime.now(UTC).isoformat(timespec="seconds")

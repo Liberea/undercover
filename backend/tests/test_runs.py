@@ -1,43 +1,62 @@
-from agent import claim as agent
-
-STEP = {"thread_id": "t-1", "kind": "tool_call", "text": "get_claim"}
-
-
-def test_add_and_list_steps(client):
-    step = client.post("/api/claims/CLM-1001/steps", json=STEP).json()
-    assert step == STEP | {"step_id": 1, "created_at": step["created_at"]}
-    assert client.get("/api/claims/CLM-1001/steps").json() == [step]
+TODOS = [
+    {"content": "Work CLM-1001", "status": "done"},
+    {"content": "Work CLM-1002", "status": "left_for_handler"},
+    {"content": "Write the summary", "status": "in_progress"},
+]
 
 
-def test_steps_of_unknown_claim(client):
-    assert client.post("/api/claims/CLM-9999/steps", json=STEP).status_code == 404
-    assert client.get("/api/claims/CLM-9999/steps").status_code == 404
+def create(client, run_id, cap=5):
+    return client.post("/api/runs", json={"run_id": run_id, "cap": cap})
 
 
-def test_unknown_step_kind(client):
-    step = STEP | {"kind": "thought"}
-    assert client.post("/api/claims/CLM-1001/steps", json=step).status_code == 422
+def test_create_run(client):
+    response = create(client, "r-1")
+    assert response.status_code == 201
+    run = response.json()
+    assert run["status"] == "running"
+    assert run["cap"] == 5
+    assert run["todos"] == []
+    assert run["summary"] is None
+    assert run["finished_at"] is None
 
 
-def test_run_agent(client, monkeypatch):
-    started = []
-    monkeypatch.setattr(agent, "run", lambda *args: started.append(args))
-    response = client.post("/api/claims/CLM-1001/agent-runs")
-    assert response.status_code == 202
-    assert started == [("CLM-1001", response.json()["thread_id"])]
+def test_a_cap_must_be_at_least_one(client):
+    assert create(client, "r-1", cap=0).status_code == 422
 
 
-def test_run_agent_on_claim_not_waiting(client, monkeypatch):
-    monkeypatch.setattr(agent, "run", lambda *args: None)
-    client.post("/api/claims/CLM-1001/start", json={"thread_id": "t-1"})
-    response = client.post("/api/claims/CLM-1001/agent-runs")
-    assert response.status_code == 409
-    assert response.json() == {"detail": "Claim CLM-1001 is in progress"}
+def test_write_todos_replaces_the_list(client):
+    create(client, "r-1")
+    client.put("/api/runs/r-1/todos", json={"todos": TODOS})
+    run = client.put("/api/runs/r-1/todos", json={"todos": TODOS[:1]}).json()
+    assert run["todos"] == TODOS[:1]
 
 
-def test_get_instructions(client):
-    instructions = client.get("/api/instructions").json()
-    assert instructions["claim"].startswith("You are the UnderCover Agent.")
-    assert instructions["queue"].startswith(
-        "You are the UnderCover Agent, running the claims queue"
-    )
+def test_unknown_todo_status(client):
+    create(client, "r-1")
+    todos = [{"content": "Work CLM-1001", "status": "pending"}]
+    assert client.put("/api/runs/r-1/todos", json={"todos": todos}).status_code == 422
+
+
+def test_todos_of_unknown_run(client):
+    response = client.put("/api/runs/r-9/todos", json={"todos": TODOS})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Run r-9 not found"}
+
+
+def test_finish_run(client):
+    create(client, "r-1")
+    run = client.post("/api/runs/r-1/finish", json={"summary": "All done."}).json()
+    assert run["status"] == "finished"
+    assert run["summary"] == "All done."
+    assert run["finished_at"] is not None
+    again = client.post("/api/runs/r-1/finish", json={"summary": "Again."})
+    assert again.status_code == 409
+
+
+def test_latest_run(client):
+    response = client.get("/api/runs/latest")
+    assert response.status_code == 200
+    assert response.json() is None
+    create(client, "r-1")
+    create(client, "r-2", cap=2)
+    assert client.get("/api/runs/latest").json()["run_id"] == "r-2"
