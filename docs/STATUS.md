@@ -1,6 +1,6 @@
 # Status
 
-The claims pilot from `docs/PLAN.md` is built: all six phases are done. The harness from `docs/PLAN_HARNESS.md` is being built: phases 1 to 4 are done.
+The claims pilot from `docs/PLAN.md` is built: all six phases are done. The harness from `docs/PLAN_HARNESS.md` is built: all five phases are done.
 
 ## Built
 
@@ -11,7 +11,7 @@ The claims pilot from `docs/PLAN.md` is built: all six phases are done. The harn
   - `start_claim` starts only a waiting claim. `release_claim` counts a failed run: the first sends the claim back to waiting, the second leaves it for a handler.
   - `pay_claim` refuses a payout over $1,000.00 (403) until a handler signs off; `sign_off_claim` then pays it. The limit comes from `data/company.json`.
   - `add_step` and `list_steps` hold what the agent did on a claim; `run_agent` starts the claim agent on a waiting claim in the background.
-  - A run of the queue agent has a cap, a status (running or finished), a to-do list and a summary: `create_run`, `write_todos`, `finish_run` and `get_latest_run`. `run_queue_agent` starts a run in the background.
+  - A run of the queue agent has a cap, a status (running or finished), a to-do list and a summary: `create_run`, `write_todos`, `finish_run` and `get_latest_run` (null before the first run). `run_queue_agent` starts a run in the background.
   - The agent's instructions are `backend/instructions/queue.md` for working the queue and `backend/instructions/claim.md` for working a claim; `get_instructions` serves both.
 - `agent/`: the UnderCover Agent, as two agents.
   - `agent/queue.py` has `work_queue(run_id, cap)`, the queue agent. Its tools are `list_claims` (the waiting claims), `write_todos` and `work_claim`, which hands one claim to a claim agent and returns its one-line report. `work_claim` works one claim at a time and refuses a new claim once the run holds `cap` claims. A hook after each model call sends the agent back when it tries to finish with a waiting claim missed within its cap, and the agent may make 4 x cap + 10 model calls. It finishes the run with its summary, or with the error if it fails itself.
@@ -34,5 +34,9 @@ The dev backend reloads when `backend/` changes. After a change in `agent/`, res
 
 ## Known limits
 
-- Now and then the model gives its decision in its reply without calling `decide_claim` (1 run in 4 while building phase 3, none in the runs after). The run counts that as a failure, puts the claim back in the queue and says so in its steps.
-- There is no sign-in, as the spec asks, so anyone using the API can sign off as any handler. The agent has no tool to sign off.
+- Now and then the model gives its decision in its reply without calling `decide_claim` (1 run in 4 while building the pilot's phase 3, none in the runs after). The run counts that as a failure, puts the claim back in the queue and says so in its steps.
+- There is no sign-in, as the spec asks, so anyone using the API can sign off as any handler or start a run. The agent has no tool to sign off.
+- The run's summary is the queue agent's own prose. In the first live run it said older claims had been left behind when it had in fact taken the oldest first. The claims' states and the one-line reports, which code builds from the backend, are the record.
+- The claim agent reads widely: 11 to 13 of the 26 sections on each claim in the live runs, which costs tokens. Its decisions have not been checked against `data/evals/` yet.
+- If the process running the agent dies partway, for example when the dev backend reloads during a run, the claim it was working stays in progress and the run stays running. `uv run -m backend.seed` clears both. Recovering from that needs durable state, which comes on a later day.
+- Nothing stops two runs at once. `start_claim` keeps them off the same claim, so no claim is worked twice.

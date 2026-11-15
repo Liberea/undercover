@@ -128,16 +128,13 @@ export function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function parse<T>(response: Response): Promise<T> {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, init);
   if (!response.ok) {
     const { detail } = (await response.json()) as { detail: string };
     throw new Error(detail);
   }
   return (await response.json()) as T;
-}
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  return parse<T>(await fetch(path, init));
 }
 
 function post<T>(path: string, body: unknown): Promise<T> {
@@ -166,7 +163,4 @@ export const runQueueAgent = (cap: number) =>
   post<{ run_id: string }>("/api/queue/agent-runs", { cap });
 
 /** The queue agent's most recent run, or null before its first run. */
-export async function getLatestRun(): Promise<Run | null> {
-  const response = await fetch("/api/runs/latest");
-  return response.status === 404 ? null : parse<Run>(response);
-}
+export const getLatestRun = () => request<Run | null>("/api/runs/latest");

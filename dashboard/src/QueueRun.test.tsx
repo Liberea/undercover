@@ -36,7 +36,7 @@ const TODOS: Run["todos"] = [
 ];
 
 it("says when there is no run yet", async () => {
-  stubApi({});
+  stubApi({ "GET /api/runs/latest": null });
   render(<QueueRun waiting={25} />);
   expect(await screen.findByText("No run yet.")).toBeDefined();
 });

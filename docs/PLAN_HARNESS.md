@@ -172,7 +172,7 @@ New, changed and removed operations. Every operation keeps an `operation_id`, a 
 
 **Success criteria**
 
-- [x] Backend tests: create a run. `write_todos` replaces its list. An unknown to-do status gives 422. `finish_run` stores the summary and marks the run finished. `get_latest_run` returns the newest run, or 404 when there is none. `run_queue_agent` returns 202 with a run id and starts the run with the cap (the run is replaced by a stub).
+- [x] Backend tests: create a run. `write_todos` replaces its list. An unknown to-do status gives 422. `finish_run` stores the summary and marks the run finished. `get_latest_run` returns the newest run, or null when there is none. (It first gave 404, but the browser logs every 404 as a console error while the queue page polls, so phase 5 changed it to null.) `run_queue_agent` returns 202 with a run id and starts the run with the cap (the run is replaced by a stub).
 - [x] Agent tests, with stub models for both agents:
   - [x] **The to-do list is stored:** the stub writes a list and then updates it, and `get_latest_run` shows each version, then the summary.
   - [x] **The cap:** with a cap of 2 and a stub that asks for three claims, two are worked. The third gets the cap refusal and stays waiting, like the other claims.
@@ -210,11 +210,11 @@ New, changed and removed operations. Every operation keeps an `operation_id`, a 
 
 **Success criteria**
 
-- [ ] With `MODEL_NAME` unset, after `uv run -m backend.seed`, and with `npm run dev` running, in the browser with the Playwright MCP server: on the queue page I work the queue with 5 claims. The run card shows the to-do list filling in and being ticked off. Five claims move through in progress to decided or waiting for sign-off (or left for a handler), and 20 stay waiting. The summary appears when the run finishes.
-- [ ] On a claim the run worked, the claim page shows its steps and the sections the agent read. Where it approved more than $1,000, the claim waits for sign-off and nothing has been paid.
-- [ ] `docs/SPEC.md`, `docs/TECH_STACK.md` and `docs/STATUS.md` describe the product as it now is: the queue agent and the claim agent, the model, the run and its to-do list, the new state, and how to run it (`--cap`, a named claim, Work the queue).
-- [ ] `uv run -m backend.seed` leaves the dev database fresh for the student.
-- [ ] `npm run check` passes in full: ruff, pyright, pytest, Prettier, ESLint, tsc, Vitest and Playwright.
+- [x] With `MODEL_NAME` unset, after `uv run -m backend.seed`, and with `npm run dev` running, in the browser with the Playwright MCP server: on the queue page I work the queue with 5 claims. The run card shows the to-do list filling in and being ticked off. Five claims move through in progress to decided or waiting for sign-off (or left for a handler), and 20 stay waiting. The summary appears when the run finishes.
+- [x] On a claim the run worked, the claim page shows its steps and the sections the agent read. Where it approved more than $1,000, the claim waits for sign-off and nothing has been paid.
+- [x] `docs/SPEC.md`, `docs/TECH_STACK.md` and `docs/STATUS.md` describe the product as it now is: the queue agent and the claim agent, the model, the run and its to-do list, the new state, and how to run it (`--cap`, a named claim, Work the queue).
+- [x] `uv run -m backend.seed` leaves the dev database fresh for the student.
+- [x] `npm run check` passes in full: ruff, pyright, pytest, Prettier, ESLint, tsc, Vitest and Playwright.
 
 ## Not in this plan
 

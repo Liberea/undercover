@@ -57,8 +57,8 @@ def test_finish_run(client):
 
 def test_latest_run(client):
     response = client.get("/api/runs/latest")
-    assert response.status_code == 404
-    assert response.json() == {"detail": "No run yet"}
+    assert response.status_code == 200
+    assert response.json() is None
     create(client, "r-1")
     create(client, "r-2", cap=2)
     assert client.get("/api/runs/latest").json()["run_id"] == "r-2"

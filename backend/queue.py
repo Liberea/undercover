@@ -56,12 +56,10 @@ def finish_run(run_id: str, body: FinishIn, db: Db) -> Run:
 
 
 @router.get("/runs/latest", operation_id="get_latest_run")
-def get_latest_run(db: Db) -> Run:
-    """Get the most recent run of the queue agent."""
+def get_latest_run(db: Db) -> Run | None:
+    """Get the most recent run of the queue agent, or null before the first run."""
     row = db.execute("SELECT run_id FROM runs ORDER BY rowid DESC LIMIT 1").fetchone()
-    if row is None:
-        raise HTTPException(404, "No run yet")
-    return find_run(db, row["run_id"])
+    return find_run(db, row["run_id"]) if row else None
 
 
 @router.post("/queue/agent-runs", operation_id="run_queue_agent", status_code=202)
