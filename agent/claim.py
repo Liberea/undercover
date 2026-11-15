@@ -9,9 +9,10 @@ from langchain.agents.middleware import AgentMiddleware, ModelCallLimitMiddlewar
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, ToolMessage
 
-from agent.api import call, request
+from agent import api
+from agent.api import result
 from agent.model import model, retry
-from agent.tools import path, tools_for
+from agent.tools import tools_for
 
 MODEL_CALL_LIMIT = 25
 NO_DECISION = "it ended without a decision"
@@ -19,8 +20,7 @@ NO_DECISION = "it ended without a decision"
 
 def add_step(claim_id: str, thread_id: str, kind: str, text: str) -> None:
     """Record one step on the claim, for the dashboard to show."""
-    body = {"thread_id": thread_id, "kind": kind, "text": text}
-    call("POST", path("claims", claim_id, "steps"), body)
+    result(api.add_step(claim_id, thread_id, kind, text))
 
 
 def messages(updates: Iterable[Any]) -> Iterator[AIMessage | ToolMessage]:
@@ -77,7 +77,7 @@ def work(
 def release(claim_id: str, thread_id: str, reason: str) -> str:
     """Record why the run failed and release the claim, which counts the failure."""
     add_step(claim_id, thread_id, "error", f"The run failed: {reason}")
-    status = call("POST", path("claims", claim_id, "release"), None)["status"]
+    status = result(api.release_claim(claim_id))["status"]
     if status == "left_for_handler":
         return f"{claim_id}: failed twice ({reason}), left for a handler"
     return f"{claim_id}: failed ({reason}), back in the queue"
@@ -102,17 +102,15 @@ def run(claim_id: str, thread_id: str, llm: BaseChatModel | None = None) -> str:
 
     A failure of the run never escapes: it is recorded and the claim released.
     """
-    instructions = call("GET", "/api/instructions", None)["claim"]
-    started = request(
-        "POST", path("claims", claim_id, "start"), {"thread_id": thread_id}
-    )
+    instructions = result(api.get_instructions())["claim"]
+    started = api.start_claim(claim_id, thread_id)
     if not started.is_success:
         return f"{claim_id}: not started ({started.json()['detail']})"
     try:
         work(claim_id, thread_id, llm, instructions)
     except Exception as error:
         return release(claim_id, thread_id, str(error))
-    claim = call("GET", path("claims", claim_id), None)
+    claim = result(api.get_claim(claim_id))
     if claim["status"] == "in_progress":
         return release(claim_id, thread_id, NO_DECISION)
     return report(claim)

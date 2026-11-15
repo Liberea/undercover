@@ -17,10 +17,9 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import BaseTool, tool
 from langgraph.runtime import Runtime
 
-from agent import claim
-from agent.api import call, request, tool_reply
+from agent import api, claim
+from agent.api import result, tool_reply
 from agent.model import model, retry
-from agent.tools import path
 
 
 class Todo(TypedDict):
@@ -30,7 +29,7 @@ class Todo(TypedDict):
 
 def waiting_claims() -> list[dict[str, Any]]:
     """List the claims waiting in the queue."""
-    return [c for c in call("GET", "/api/claims", None) if c["status"] == "waiting"]
+    return [c for c in result(api.list_claims()) if c["status"] == "waiting"]
 
 
 def model_call_limit(cap: int) -> int:
@@ -86,7 +85,7 @@ def tools_for_run(run_id: str, cap: int, taken: set[str]) -> list[BaseTool]:
     @tool
     def write_todos(todos: list[Todo]) -> str:
         """Replace your whole to-do list for this run, each item with its status."""
-        response = request("PUT", path("runs", run_id, "todos"), {"todos": todos})
+        response = api.write_todos(run_id, todos)
         return (
             "The to-do list is updated."
             if response.is_success
@@ -153,13 +152,12 @@ def work_queue(run_id: str, cap: int, llm: BaseChatModel | None = None) -> str:
 
     If the queue agent itself fails, the run is finished with the error.
     """
-    call("POST", "/api/runs", {"run_id": run_id, "cap": cap})
-    instructions = call("GET", "/api/instructions", None)["queue"]
-    finish = path("runs", run_id, "finish")
+    result(api.create_run(run_id, cap))
+    instructions = result(api.get_instructions())["queue"]
     try:
         summary = work(run_id, cap, llm, instructions)
     except Exception as error:
-        call("POST", finish, {"summary": f"The run stopped: {error}"})
+        result(api.finish_run(run_id, f"The run stopped: {error}"))
         raise
-    call("POST", finish, {"summary": summary})
+    result(api.finish_run(run_id, summary))
     return summary

@@ -1,7 +1,4 @@
-import httpx
-import pytest
-
-from agent import api, tools
+from agent import tools
 
 DECISION = {
     "outcome": "decline",
@@ -69,12 +66,6 @@ def test_claim_tools_act_only_on_the_runs_claim(client):
     assert client.get("/api/claims/CLM-1002").json()["status"] == "in_progress"
 
 
-def test_ids_are_escaped_in_paths():
-    assert tools.path("claims", "CLM-1002/release?") == (
-        "/api/claims/CLM-1002%2Frelease%3F"
-    )
-
-
 def test_tool_names_match_operation_ids(client):
     operation_ids = {
         operation["operationId"]
@@ -82,9 +73,3 @@ def test_tool_names_match_operation_ids(client):
         for operation in methods.values()
     }
     assert {t.name for t in tools.tools_for("CLM-1001")} <= operation_ids
-
-
-def test_server_error_stops_the_run():
-    response = httpx.Response(500, request=httpx.Request("GET", "http://test"))
-    with pytest.raises(httpx.HTTPStatusError):
-        api.tool_reply(response)

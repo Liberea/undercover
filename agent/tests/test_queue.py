@@ -3,7 +3,7 @@ from itertools import count
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 
-from agent import claim, queue
+from agent import api, claim, queue
 from agent.tests.stubs import broken, call, decide, reply, stub
 
 
@@ -49,14 +49,14 @@ def nudges(model):
 def test_the_to_do_list_is_stored(client, claim_models, monkeypatch):
     claim_models(declines())
     versions = []
-    real_request = queue.request
+    real_write_todos = api.write_todos
 
     def watch(*args):
-        response = real_request(*args)
+        response = real_write_todos(*args)
         versions.append(latest_run(client)["todos"])
         return response
 
-    monkeypatch.setattr(queue, "request", watch)
+    monkeypatch.setattr(api, "write_todos", watch)
     planned = [todo("Work CLM-1001", "to_do"), todo("Write the summary", "to_do")]
     finished = [todo("Work CLM-1001", "done"), todo("Write the summary", "done")]
     model = stub(
