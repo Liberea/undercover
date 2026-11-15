@@ -45,7 +45,12 @@ it("follows the URL to a claim's page within the queue", async () => {
 });
 
 it("follows the URL to the instructions", async () => {
-  stubApi({ "GET /api/instructions": { text: "You are the agent." } });
+  stubApi({
+    "GET /api/instructions": {
+      queue: "You run the queue.",
+      claim: "You are the agent.",
+    },
+  });
   render(<App />);
   goTo("#/instructions");
   expect(await screen.findByText("You are the agent.")).toBeDefined();

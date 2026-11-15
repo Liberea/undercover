@@ -172,20 +172,20 @@ New, changed and removed operations. Every operation keeps an `operation_id`, a 
 
 **Success criteria**
 
-- [ ] Backend tests: create a run. `write_todos` replaces its list. An unknown to-do status gives 422. `finish_run` stores the summary and marks the run finished. `get_latest_run` returns the newest run, or 404 when there is none. `run_queue_agent` returns 202 with a run id and starts the run with the cap (the run is replaced by a stub).
-- [ ] Agent tests, with stub models for both agents:
-  - [ ] **The to-do list is stored:** the stub writes a list and then updates it, and `get_latest_run` shows each version, then the summary.
-  - [ ] **The cap:** with a cap of 2 and a stub that asks for three claims, two are worked. The third gets the cap refusal and stays waiting, like the other claims.
-  - [ ] **A failed claim doesn't stop the run:** the claim agent fails on the first claim, and the run goes on and finishes with a summary.
-  - [ ] **A failed claim goes back in the queue and is tried again:** a claim fails once and is decided on its second try in the same run.
-  - [ ] **A claim that fails twice is left for a handler:** the run finishes and doesn't try it a third time.
-  - [ ] **The check for missed claims:** the stub tries to finish with a waiting claim inside its cap. The hook's message names that claim, the stub works it, and then the run finishes. At the cap, the stub finishes with no message from the hook.
-  - [ ] **Nothing is decided twice:** asked to work a decided claim, `work_claim` reports `not started` and the decision stays as it was.
-  - [ ] The queue agent's system prompt is the queue instructions, and the claim agent's is the claim instructions, both from the API.
-  - [ ] The command line: `--cap`, one named claim, and the whole queue.
-- [ ] Vitest and `npm run e2e` pass for the instructions page showing both sets of instructions, read only.
-- [ ] One real run with `MODEL_NAME` unset and the backend running. After `uv run -m backend.seed`, `uv run -m agent --cap 5` prints five claims' lines and a summary. `GET /api/runs/latest` shows the run finished, with every to-do item done or left for a handler, and with the summary. `GET /api/claims` shows 20 claims still waiting. This costs a few cents. Then `uv run -m backend.seed`.
-- [ ] `npm run check:python` and `npm run check:ts` pass with coverage at 80% or more.
+- [x] Backend tests: create a run. `write_todos` replaces its list. An unknown to-do status gives 422. `finish_run` stores the summary and marks the run finished. `get_latest_run` returns the newest run, or 404 when there is none. `run_queue_agent` returns 202 with a run id and starts the run with the cap (the run is replaced by a stub).
+- [x] Agent tests, with stub models for both agents:
+  - [x] **The to-do list is stored:** the stub writes a list and then updates it, and `get_latest_run` shows each version, then the summary.
+  - [x] **The cap:** with a cap of 2 and a stub that asks for three claims, two are worked. The third gets the cap refusal and stays waiting, like the other claims.
+  - [x] **A failed claim doesn't stop the run:** the claim agent fails on the first claim, and the run goes on and finishes with a summary.
+  - [x] **A failed claim goes back in the queue and is tried again:** a claim fails once and is decided on its second try in the same run.
+  - [x] **A claim that fails twice is left for a handler:** the run finishes and doesn't try it a third time.
+  - [x] **The check for missed claims:** the stub tries to finish with a waiting claim inside its cap. The hook's message names that claim, the stub works it, and then the run finishes. At the cap, the stub finishes with no message from the hook.
+  - [x] **Nothing is decided twice:** asked to work a decided claim, `work_claim` reports `not started` and the decision stays as it was.
+  - [x] The queue agent's system prompt is the queue instructions, and the claim agent's is the claim instructions, both from the API.
+  - [x] The command line: `--cap`, one named claim, and the whole queue.
+- [x] Vitest and `npm run e2e` pass for the instructions page showing both sets of instructions, read only.
+- [x] One real run with `MODEL_NAME` unset and the backend running. After `uv run -m backend.seed`, `uv run -m agent --cap 5` prints five claims' lines and a summary. `GET /api/runs/latest` shows the run finished, with every to-do item done or left for a handler, and with the summary. `GET /api/claims` shows 20 claims still waiting. This costs a few cents. Then `uv run -m backend.seed`.
+- [x] `npm run check:python` and `npm run check:ts` pass with coverage at 80% or more.
 
 ## Phase 4: The run on the dashboard
 

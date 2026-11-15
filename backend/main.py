@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from backend import claims, documents, lifecycle, records, runs
+from backend import claims, documents, lifecycle, queue, records, runs
 from backend.db import db_path
 from backend.seed import seed
 
@@ -22,6 +22,7 @@ app = FastAPI(title="UnderCover", lifespan=lifespan)
 app.include_router(claims.router)
 app.include_router(documents.router)
 app.include_router(lifecycle.router)
+app.include_router(queue.router)
 app.include_router(records.router)
 app.include_router(runs.router)
 

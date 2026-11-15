@@ -36,5 +36,8 @@ def test_run_agent_on_claim_not_waiting(client, monkeypatch):
 
 
 def test_get_instructions(client):
-    text = client.get("/api/instructions").json()["text"]
-    assert text.startswith("You are the UnderCover Agent.")
+    instructions = client.get("/api/instructions").json()
+    assert instructions["claim"].startswith("You are the UnderCover Agent.")
+    assert instructions["queue"].startswith(
+        "You are the UnderCover Agent, running the claims queue"
+    )

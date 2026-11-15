@@ -137,7 +137,7 @@ export const listSteps = (id: string) =>
   request<Step[]>(`/api/claims/${id}/steps`);
 export const listHandlers = () => request<Handler[]>("/api/handlers");
 export const getInstructions = () =>
-  request<{ text: string }>("/api/instructions");
+  request<{ queue: string; claim: string }>("/api/instructions");
 export const runAgent = (id: string) =>
   post<{ thread_id: string }>(`/api/claims/${id}/agent-runs`, {});
 export const signOff = (id: string, handlerId: string) =>

@@ -35,6 +35,15 @@ CREATE TABLE decisions (
     paid_at TEXT,
     signed_off_by TEXT REFERENCES handlers
 );
+CREATE TABLE runs (
+    run_id TEXT PRIMARY KEY,
+    cap INTEGER NOT NULL,
+    status TEXT NOT NULL,
+    todos TEXT NOT NULL,
+    summary TEXT,
+    started_at TEXT NOT NULL,
+    finished_at TEXT
+);
 CREATE TABLE steps (
     step_id INTEGER PRIMARY KEY AUTOINCREMENT,
     claim_id TEXT NOT NULL REFERENCES claims,

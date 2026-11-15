@@ -102,7 +102,7 @@ def run(claim_id: str, thread_id: str, llm: BaseChatModel | None = None) -> str:
 
     A failure of the run never escapes: it is recorded and the claim released.
     """
-    instructions = call("GET", "/api/instructions", None)["text"]
+    instructions = call("GET", "/api/instructions", None)["claim"]
     started = request(
         "POST", path("claims", claim_id, "start"), {"thread_id": thread_id}
     )

@@ -3,16 +3,24 @@
 from itertools import count
 
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, BaseMessage
+from pydantic import Field
 
 ids = count()
 
 
 class StubModel(GenericFakeChatModel):
-    """A chat model that gives scripted replies in place of a real model."""
+    """A chat model that gives scripted replies in place of a real model, and
+    keeps the last message it was given on each call."""
+
+    seen: list[BaseMessage] = Field(default_factory=list)
 
     def bind_tools(self, tools, **kwargs):
         return self
+
+    def _generate(self, messages, *args, **kwargs):
+        self.seen.append(messages[-1])
+        return super()._generate(messages, *args, **kwargs)
 
 
 class BrokenModel(StubModel):

@@ -54,6 +54,49 @@ class AgentRun(BaseModel):
     thread_id: str
 
 
+TodoStatus = Literal["to_do", "in_progress", "done", "left_for_handler"]
+
+
+class Todo(BaseModel):
+    content: str
+    status: TodoStatus
+
+
+class TodosIn(BaseModel):
+    todos: list[Todo]
+
+
+class CapIn(BaseModel):
+    cap: int = Field(gt=0, description="The most claims the run may work")
+
+
+class RunIn(CapIn):
+    run_id: str
+
+
+class FinishIn(BaseModel):
+    summary: str
+
+
+class Run(BaseModel):
+    run_id: str
+    cap: int
+    status: Literal["running", "finished"]
+    todos: list[Todo]
+    summary: str | None
+    started_at: str
+    finished_at: str | None
+
+
+class QueueAgentRun(BaseModel):
+    run_id: str
+
+
+class Instructions(BaseModel):
+    queue: str
+    claim: str
+
+
 class Item(BaseModel):
     description: str
     category: str
@@ -152,10 +195,6 @@ class Handler(BaseModel):
     name: str
     role: str
     can_approve_over_limit: bool
-
-
-class Text(BaseModel):
-    text: str
 
 
 class SectionHeading(BaseModel):

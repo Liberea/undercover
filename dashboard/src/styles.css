@@ -609,6 +609,11 @@ pre {
   margin: 40px 0 20px;
 }
 
+.stack-tight {
+  display: grid;
+  gap: 12px;
+}
+
 .instructions {
   margin: 0;
   padding: 24px;

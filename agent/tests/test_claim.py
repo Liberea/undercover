@@ -172,4 +172,4 @@ def test_instructions_come_from_the_api(client, monkeypatch):
 
     monkeypatch.setattr(agent, "create_agent", spy)
     agent.run("CLM-1001", "t-10", stub(reply("Done.")))
-    assert seen["system_prompt"] == client.get("/api/instructions").json()["text"]
+    assert seen["system_prompt"] == client.get("/api/instructions").json()["claim"]

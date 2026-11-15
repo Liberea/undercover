@@ -1,6 +1,6 @@
 # Status
 
-The claims pilot from `docs/PLAN.md` is built: all six phases are done. The harness from `docs/PLAN_HARNESS.md` is being built: phases 1 and 2 are done.
+The claims pilot from `docs/PLAN.md` is built: all six phases are done. The harness from `docs/PLAN_HARNESS.md` is being built: phases 1 to 3 are done.
 
 ## Built
 
@@ -10,20 +10,23 @@ The claims pilot from `docs/PLAN.md` is built: all six phases are done. The harn
   - A claim's states: waiting, in progress, waiting for sign-off, decided, left for a handler. `start_claim`, `release_claim`, `decide_claim`, `pay_claim` and `sign_off_claim` move it between them.
   - `start_claim` starts only a waiting claim. `release_claim` counts a failed run: the first sends the claim back to waiting, the second leaves it for a handler.
   - `pay_claim` refuses a payout over $1,000.00 (403) until a handler signs off; `sign_off_claim` then pays it. The limit comes from `data/company.json`.
-  - `add_step` and `list_steps` hold what the agent did on a claim; `run_agent` starts the agent on a waiting claim in the background.
-  - The agent's instructions are `backend/instructions.md`.
-- `agent/`: the UnderCover Agent. `agent/claim.py` has `run(claim_id, thread_id)`, which works one claim on `create_agent` with the model from `agent/model.py`: DeepSeek V4.1 Flash (low reasoning, 60-second timeout) or the model in `MODEL_NAME`. Its seven tools (`agent/tools.py`) each call one API operation, are bound to the run's claim so the model passes no record ids, and hand the backend's refusals back to the model as text. It looks up the sections of the wording and the manual it needs with `list_sections` and `read_section`, and each section it reads is recorded as a `read` step. It records every step through the API. `ModelRetryMiddleware` retries a failed model call twice, and `ModelCallLimitMiddleware` stops a run after 25 model calls. `run` never raises: a run that fails or ends without a decision is recorded as an error step and released, and `run` returns one line, such as `CLM-1002: approved $1,150.00, waiting for sign-off` or `CLM-1003: failed (...), back in the queue`.
+  - `add_step` and `list_steps` hold what the agent did on a claim; `run_agent` starts the claim agent on a waiting claim in the background.
+  - A run of the queue agent has a cap, a status (running or finished), a to-do list and a summary: `create_run`, `write_todos`, `finish_run` and `get_latest_run`. `run_queue_agent` starts a run in the background.
+  - The agent's instructions are `backend/instructions/queue.md` for working the queue and `backend/instructions/claim.md` for working a claim; `get_instructions` serves both.
+- `agent/`: the UnderCover Agent, as two agents.
+  - `agent/queue.py` has `work_queue(run_id, cap)`, the queue agent. Its tools are `list_claims` (the waiting claims), `write_todos` and `work_claim`, which hands one claim to a claim agent and returns its one-line report. `work_claim` works one claim at a time and refuses a new claim once the run holds `cap` claims. A hook after each model call sends the agent back when it tries to finish with a waiting claim missed within its cap, and the agent may make 4 x cap + 10 model calls. It finishes the run with its summary, or with the error if it fails itself.
+  - `agent/claim.py` has `run(claim_id, thread_id)`, which works one claim on `create_agent` with the model from `agent/model.py`: DeepSeek V4.1 Flash (low reasoning, 60-second timeout) or the model in `MODEL_NAME`. Its seven tools (`agent/tools.py`) each call one API operation, are bound to the run's claim so the model passes no record ids, and hand the backend's refusals back to the model as text. It looks up the sections of the wording and the manual it needs with `list_sections` and `read_section`, and each section it reads is recorded as a `read` step. It records every step through the API. `ModelRetryMiddleware` retries a failed model call twice, and `ModelCallLimitMiddleware` stops a run after 25 model calls. `run` never raises: a run that fails or ends without a decision is recorded as an error step and released, and `run` returns one line, such as `CLM-1002: approved $1,150.00, waiting for sign-off` or `CLM-1003: failed (...), back in the queue`.
 - `dashboard/`: React and Vite in the brand's look, dark by default with a light mode switch.
   - The claims queue shows how many claims are in each state and every claim with its status and decision, refreshed every two seconds.
   - A claim's page shows the claim in full with its policy and the customer's earlier claims, a Run the agent button while it waits, the decision with its reasons, policy section and payment, a sign-off form for a payout over $1,000, and the agent's steps with the sections it read, refreshed every second.
-  - The instructions page shows the agent's instructions, read only.
+  - The instructions page shows the agent's instructions for working the queue and for working a claim, read only.
 - `e2e/`: Playwright tests of the queue, a claim and the instructions. They start their own backend on port 8100 with a fresh database (`e2e/e2e.db`) and their own dashboard on port 5180, so they never touch the dev data. The claim test plays the agent through the API, since tests never call a model.
 
 ## Run it
 
 - `npm run dev` starts the backend on port 8000 and the dashboard at http://localhost:5173. Open a claim and press Run the agent.
-- `uv run -m agent CLM-1001` runs the agent on one claim from the command line and prints its one-line report; `uv run -m agent` works through every waiting claim. The backend must be running.
-- `uv run -m backend.seed` rebuilds the database from `data/`, putting every claim back to waiting. Run it after pulling a change to the database's tables, such as the claims' failure count.
+- `uv run -m agent --cap 5` runs the queue agent on at most five waiting claims, printing each claim's report and then the summary; `uv run -m agent` works the whole queue; `uv run -m agent CLM-1001` works one claim. The backend must be running.
+- `uv run -m backend.seed` rebuilds the database from `data/`, putting every claim back to waiting. Run it after pulling a change to the database's tables, such as the claims' failure count or the runs.
 - `npm run check` runs every check.
 
 The dev backend reloads when `backend/` changes. After a change in `agent/`, restart `npm run dev` so that Run the agent uses the new code.

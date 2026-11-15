@@ -6,11 +6,11 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 
 from backend.db import Db
-from backend.models import ClaimHistory, Handler, Policy, Text
+from backend.models import ClaimHistory, Handler, Instructions, Policy
 
 router = APIRouter(prefix="/api")
 
-INSTRUCTIONS = Path(__file__).parent / "instructions.md"
+INSTRUCTIONS = Path(__file__).parent / "instructions"
 
 
 @router.get("/policies/{policy_id}", operation_id="get_policy")
@@ -43,6 +43,9 @@ def list_handlers(db: Db) -> list[Handler]:
 
 
 @router.get("/instructions", operation_id="get_instructions")
-def get_instructions() -> Text:
-    """Get the UnderCover Agent's instructions."""
-    return Text(text=INSTRUCTIONS.read_text(encoding="utf-8"))
+def get_instructions() -> Instructions:
+    """Get the UnderCover Agent's instructions for the queue and for a claim."""
+    return Instructions(
+        queue=(INSTRUCTIONS / "queue.md").read_text(encoding="utf-8"),
+        claim=(INSTRUCTIONS / "claim.md").read_text(encoding="utf-8"),
+    )
