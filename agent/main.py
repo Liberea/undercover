@@ -18,12 +18,12 @@ from agent.tools import tools_for
 load_dotenv(override=True)
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-DEFAULT_MODEL = "openai/gpt-6-luna"
+DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash"
 NO_DECISION = "The run ended without a decision, so the claim is back in the queue."
 
 
 def model() -> ChatOpenAI:
-    """Return the model named in MODEL_NAME, or GPT-6 Luna by default."""
+    """Return the model named in MODEL_NAME, or DeepSeek V4.1 Flash by default."""
     name = os.getenv("MODEL_NAME")
     return ChatOpenAI(
         model=name or DEFAULT_MODEL,
@@ -47,14 +47,17 @@ def messages(updates: Iterable[Any]) -> Iterator[AIMessage | ToolMessage]:
 
 
 def steps(message: AIMessage | ToolMessage) -> list[tuple[str, str]]:
-    """Describe a message as the steps it holds: tool calls, a result or a reply."""
+    """Describe a message as the steps it holds: tool calls, a result, a section
+    read or a reply. A section that was read carries its heading as an artifact."""
     if isinstance(message, ToolMessage):
+        if message.name == "read_section" and message.artifact:
+            return [("read", message.text)]
         return [("tool_result", f"{message.name}: {message.text}")]
     found = [
         ("tool_call", f"{c['name']}({json.dumps(c['args'])})")
         for c in message.tool_calls
     ]
-    if message.text:
+    if message.text.strip():
         found.append(("reply", message.text))
     return found
 

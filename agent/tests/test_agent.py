@@ -52,7 +52,8 @@ def test_approve_under_the_limit_and_pay(client):
         call("get_claim"),
         call("get_policy"),
         call("get_claim_history"),
-        call("get_policy_wording"),
+        call("list_sections", document="claims_manual"),
+        call("read_section", document="claims_manual", section=7),
         decide("approve", 420),
         call("pay_claim", amount=420),
         AIMessage(content="Approved and paid $420.00."),
@@ -63,11 +64,38 @@ def test_approve_under_the_limit_and_pay(client):
     assert claim["thread_id"] == "t-1"
     assert claim["decision"]["payment"]["amount"] == 420
     taken = steps(client, "CLM-1001")
-    assert [s["kind"] for s in taken] == ["tool_call", "tool_result"] * 6 + ["reply"]
+    assert [s["kind"] for s in taken] == (
+        ["tool_call", "tool_result"] * 4
+        + ["tool_call", "read"]
+        + ["tool_call", "tool_result"] * 2
+        + ["reply"]
+    )
     assert taken[0]["text"] == "get_claim({})"
     assert taken[1]["text"].startswith('get_claim: {"claim_id":"CLM-1001"')
+    assert taken[9]["text"].startswith(
+        "Claims manual, 7. Interpretation notes\n\nThese notes record"
+    )
     assert taken[-1]["text"] == "Approved and paid $420.00."
     assert {s["thread_id"] for s in taken} == {"t-1"}
+
+
+def test_blank_text_beside_a_tool_call_is_not_a_reply():
+    message = call("get_claim")
+    message.content = "\n\n"
+    assert main.steps(message) == [("tool_call", "get_claim({})")]
+
+
+def test_a_refused_read_is_a_result_not_a_read(client):
+    model = stub(
+        call("read_section", document="claims_manual", section=99),
+        AIMessage(content="I cannot decide this claim."),
+    )
+    main.run("CLM-1001", "t-6", model)
+    kinds = [s["kind"] for s in steps(client, "CLM-1001")]
+    assert "read" not in kinds
+    assert steps(client, "CLM-1001")[1]["text"] == (
+        'read_section: {"detail":"Section 99 of claims_manual not found"}'
+    )
 
 
 def test_payment_over_the_limit_is_held_even_if_the_agent_pays(client):
@@ -124,6 +152,10 @@ def test_instructions_come_from_the_api(client, monkeypatch):
 def test_model_name(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     monkeypatch.delenv("MODEL_NAME", raising=False)
-    assert main.model().model_name == "openai/gpt-6-luna"
+    default = main.model()
+    assert default.model_name == "deepseek/deepseek-v4.1-flash"
+    assert default.reasoning_effort == "low"
     monkeypatch.setenv("MODEL_NAME", "openrouter/free")
-    assert main.model().model_name == "openrouter/free"
+    chosen = main.model()
+    assert chosen.model_name == "openrouter/free"
+    assert chosen.reasoning_effort is None

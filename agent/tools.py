@@ -7,6 +7,8 @@ from langchain_core.tools import BaseTool, tool
 
 from agent.api import call, request, tool_reply
 
+Document = Literal["policy_wording", "claims_manual"]
+
 
 def path(*parts: str) -> str:
     """Build an API path, escaping each part so an id can't add segments or a query."""
@@ -14,9 +16,24 @@ def path(*parts: str) -> str:
 
 
 @tool
-def get_policy_wording() -> str:
-    """Get the policy wording that every decision follows."""
-    return tool_reply(request("GET", path("policy-wording"), None))
+def list_sections(document: Document) -> str:
+    """List the numbered sections of the policy wording or the claims manual, with
+    the topics in each."""
+    return tool_reply(request("GET", path("documents", document, "sections"), None))
+
+
+@tool(response_format="content_and_artifact")
+def read_section(document: Document, section: int) -> tuple[str, str | None]:
+    """Read one numbered section of the policy wording or the claims manual."""
+    response = request(
+        "GET", path("documents", document, "sections", str(section)), None
+    )
+    if not response.is_success:
+        return tool_reply(response), None
+    found = response.json()
+    name = document.replace("_", " ").capitalize()
+    heading = f"{name}, {section}. {found['title']}"
+    return f"{heading}\n\n{found['text']}", heading
 
 
 def tools_for(claim_id: str) -> list[BaseTool]:
@@ -72,7 +89,8 @@ def tools_for(claim_id: str) -> list[BaseTool]:
         get_claim,
         get_policy,
         get_claim_history,
-        get_policy_wording,
+        list_sections,
+        read_section,
         decide_claim,
         pay_claim,
     ]

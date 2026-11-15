@@ -37,6 +37,5 @@ def test_list_handlers(client):
     ]
 
 
-def test_get_policy_wording(client):
-    text = client.get("/api/policy-wording").json()["text"]
-    assert text.startswith("# UnderCover Travel Insurance: Policy Wording")
+def test_policy_wording_is_not_served_whole(client):
+    assert client.get("/api/policy-wording").status_code == 404

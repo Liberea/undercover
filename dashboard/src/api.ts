@@ -1,7 +1,7 @@
 export type Status =
   "waiting" | "in_progress" | "waiting_for_sign_off" | "decided";
 export type Outcome = "approve" | "decline" | "refer";
-export type StepKind = "tool_call" | "tool_result" | "reply" | "error";
+export type StepKind = "tool_call" | "tool_result" | "read" | "reply" | "error";
 
 export interface ClaimSummary {
   claim_id: string;

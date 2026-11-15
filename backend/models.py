@@ -34,7 +34,7 @@ class SignOffIn(BaseModel):
     handler_id: str
 
 
-StepKind = Literal["tool_call", "tool_result", "reply", "error"]
+StepKind = Literal["tool_call", "tool_result", "read", "reply", "error"]
 
 
 class StepIn(BaseModel):
@@ -153,4 +153,17 @@ class Handler(BaseModel):
 
 
 class Text(BaseModel):
+    text: str
+
+
+class SectionHeading(BaseModel):
+    section: int
+    title: str
+    topics: list[str]
+
+
+class Section(BaseModel):
+    document: str
+    section: int
+    title: str
     text: str

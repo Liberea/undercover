@@ -94,6 +94,27 @@ it("shows the agent's steps while it works", async () => {
   expect(screen.queryByRole("button", { name: "Run the agent" })).toBeNull();
 });
 
+it("lists the sections the agent read", async () => {
+  const read = "Claims manual, 7. Interpretation notes\n\nThese notes record.";
+  show(claim({ status: "in_progress" }), [
+    step("tool_call", 'read_section({"section": 7})', 1),
+    step("read", read, 2),
+    step("read", read, 3),
+    step("read", "Policy wording, 5. Baggage\n\nWe pay for loss.", 4),
+  ]);
+  const list = await screen.findByRole("list", {
+    name: "Sections the agent read",
+  });
+  expect(
+    [...list.querySelectorAll("li")].map((item) => item.textContent),
+  ).toEqual([
+    "Claims manual, 7. Interpretation notes",
+    "Policy wording, 5. Baggage",
+  ]);
+  expect(screen.getAllByText("Read")).toHaveLength(3);
+  expect(screen.getAllByText("These notes record.")).toHaveLength(2);
+});
+
 it("shows a paid approval with its reasons", async () => {
   const payment = {
     amount: 420,

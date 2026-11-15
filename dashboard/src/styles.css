@@ -571,6 +571,27 @@ pre {
   color: var(--alert);
 }
 
+.sections-read {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sections-read h3 {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.sections-read ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+
 .working {
   display: flex;
   align-items: center;

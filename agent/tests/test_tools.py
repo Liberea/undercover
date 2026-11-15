@@ -21,9 +21,39 @@ def test_tools_read_the_claims_own_records(client):
     assert '"claim_id":"CLM-1001"' in tool("get_claim").invoke({})
 
 
+def test_the_models_tools(client):
+    assert [t.name for t in tools.tools_for("CLM-1001")] == [
+        "get_claim",
+        "get_policy",
+        "get_claim_history",
+        "list_sections",
+        "read_section",
+        "decide_claim",
+        "pay_claim",
+    ]
+
+
 def test_the_model_passes_no_ids(client):
     model_inputs = {arg for t in tools.tools_for("CLM-1001") for arg in t.args}
-    assert model_inputs == {*DECISION, "amount"}
+    assert model_inputs == {*DECISION, "amount", "document", "section"}
+
+
+def test_list_sections(client):
+    contents = tool("list_sections").invoke({"document": "claims_manual"})
+    assert '"title":"Repeat claims"' in contents
+
+
+def test_read_section_gives_its_heading_as_artifact(client):
+    message = tool("read_section").invoke(
+        {
+            "type": "tool_call",
+            "id": "c-1",
+            "name": "read_section",
+            "args": {"document": "policy_wording", "section": 3},
+        }
+    )
+    assert message.artifact == "Policy wording, 3. Trip Delay"
+    assert message.content.startswith("Policy wording, 3. Trip Delay\n\nWe pay when")
 
 
 def test_tool_hands_a_refusal_to_the_model(client):
