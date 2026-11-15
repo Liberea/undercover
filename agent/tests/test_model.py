@@ -12,9 +12,3 @@ def test_model_name(monkeypatch):
     chosen = model.model()
     assert chosen.model_name == "openrouter/free"
     assert chosen.reasoning_effort is None
-
-
-def test_retry_twice_then_raise():
-    retry = model.retry()
-    assert retry.max_retries == 2
-    assert retry.on_failure == "error"

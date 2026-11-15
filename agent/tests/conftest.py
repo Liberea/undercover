@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from agent import api, model
+from agent import api, harness
 from backend.main import app
 from backend.seed import seed
 
@@ -9,7 +9,7 @@ from backend.seed import seed
 @pytest.fixture(autouse=True)
 def no_retry_delay(monkeypatch):
     """Retry a failed model call at once, so the tests don't wait."""
-    monkeypatch.setattr(model, "RETRY_DELAY_SECONDS", 0)
+    monkeypatch.setattr(harness, "RETRY_DELAY_SECONDS", 0)
 
 
 @pytest.fixture

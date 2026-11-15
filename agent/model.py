@@ -1,9 +1,8 @@
-"""The model both agents run on, and the retries that see it through failures."""
+"""The model both agents run on."""
 
 import os
 
 from dotenv import load_dotenv
-from langchain.agents.middleware import ModelRetryMiddleware
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
@@ -12,7 +11,6 @@ load_dotenv(override=True)
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_MODEL = "deepseek/deepseek-v4.1-flash"
 TIMEOUT_SECONDS = 60
-RETRY_DELAY_SECONDS = 1.0
 
 
 def model() -> ChatOpenAI:
@@ -24,11 +22,4 @@ def model() -> ChatOpenAI:
         api_key=SecretStr(os.environ["OPENROUTER_API_KEY"]),
         reasoning_effort=None if name else "low",
         timeout=TIMEOUT_SECONDS,
-    )
-
-
-def retry() -> ModelRetryMiddleware:
-    """Retry a failed model call twice, waiting longer each time, then raise."""
-    return ModelRetryMiddleware(
-        max_retries=2, initial_delay=RETRY_DELAY_SECONDS, on_failure="error"
     )

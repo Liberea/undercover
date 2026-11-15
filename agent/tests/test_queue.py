@@ -3,7 +3,7 @@ from itertools import count
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 
-from agent import api, claim, queue
+from agent import api, harness, queue, tools
 from agent.tests.stubs import broken, call, decide, reply, stub
 
 
@@ -28,7 +28,7 @@ def claim_models(monkeypatch):
             next(used)
             return next(listed)
 
-        monkeypatch.setattr(claim, "model", next_model)
+        monkeypatch.setattr(harness, "model", next_model)
         return used
 
     return give
@@ -151,14 +151,13 @@ def test_the_check_for_missed_claims(client, claim_models):
 
 def test_work_claim_refuses_a_claim_that_is_not_waiting(client, claim_models):
     claim_models(declines())
-    taken = set()
-    work_claim = queue.tools_for_run("r-1", 2, taken)[2]
-    work_claim.invoke({"claim_id": "CLM-1001"})
-    report = work_claim.invoke({"claim_id": "CLM-1001"})
+    run = queue.Run("r-1", 2)
+    run.work_claim("CLM-1001")
+    report = run.work_claim("CLM-1001")
     assert report == "CLM-1001: not started (Claim CLM-1001 is decided)"
-    unknown = work_claim.invoke({"claim_id": "CLM-9999"})
+    unknown = run.work_claim("CLM-9999")
     assert unknown == "CLM-9999 is not waiting in the queue, so it was not started."
-    assert taken == {"CLM-1001"}
+    assert run.taken == {"CLM-1001"}
     decision = client.get("/api/claims/CLM-1001").json()["decision"]
     assert decision["outcome"] == "decline"
 
@@ -179,7 +178,7 @@ def test_claims_asked_for_at_once_are_worked_one_at_a_time(client, claim_models)
 
 def test_list_claims_shows_only_the_waiting_claims(client):
     client.post("/api/claims/CLM-1001/start", json={"thread_id": "t-1"})
-    listed = queue.tools_for_run("r-1", 2, set())[0].invoke({})
+    listed = tools.list_claims.invoke({})
     assert '"claim_id": "CLM-1001"' not in listed
     assert '{"claim_id": "CLM-1002", "claim_type": "baggage"' in listed
 
@@ -195,14 +194,13 @@ def test_a_failed_queue_agent_finishes_the_run_with_the_error(client):
 def test_each_agent_gets_its_own_instructions(client, claim_models, monkeypatch):
     claim_models(declines())
     prompts = []
-    real_create_agent = queue.create_agent
+    real_create_agent = harness.create_agent
 
     def spy(*args, **kwargs):
         prompts.append(kwargs["system_prompt"])
         return real_create_agent(*args, **kwargs)
 
-    monkeypatch.setattr(queue, "create_agent", spy)
-    monkeypatch.setattr(claim, "create_agent", spy)
+    monkeypatch.setattr(harness, "create_agent", spy)
     model = stub(call("work_claim", claim_id="CLM-1001"), reply("Done."))
     queue.work_queue("r-1", 1, model)
     instructions = client.get("/api/instructions").json()

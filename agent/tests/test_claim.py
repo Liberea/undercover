@@ -1,6 +1,7 @@
 import pytest
 
 from agent import claim as agent
+from agent import harness
 from agent.tests.stubs import FlakyModel, broken, call, decide, reply, stub
 
 
@@ -140,15 +141,6 @@ def test_blank_text_beside_a_tool_call_is_not_a_reply():
     assert agent.steps(message) == [("tool_call", "get_claim({})")]
 
 
-def test_middleware_updates_hold_no_messages():
-    updates = [
-        {"ModelCallLimitMiddleware.before_model": None},
-        {"model": {"messages": [reply("Done.")]}},
-        {"ModelCallLimitMiddleware.after_model": {"run_model_call_count": 1}},
-    ]
-    assert [m.text for m in agent.messages(updates)] == ["Done."]
-
-
 def test_a_refused_read_is_a_result_not_a_read(client):
     model = stub(
         call("read_section", document="claims_manual", section=99),
@@ -164,12 +156,12 @@ def test_a_refused_read_is_a_result_not_a_read(client):
 
 def test_instructions_come_from_the_api(client, monkeypatch):
     seen = {}
-    real_create_agent = agent.create_agent
+    real_create_agent = harness.create_agent
 
     def spy(*args, **kwargs):
         seen.update(kwargs)
         return real_create_agent(*args, **kwargs)
 
-    monkeypatch.setattr(agent, "create_agent", spy)
+    monkeypatch.setattr(harness, "create_agent", spy)
     agent.run("CLM-1001", "t-10", stub(reply("Done.")))
     assert seen["system_prompt"] == client.get("/api/instructions").json()["claim"]

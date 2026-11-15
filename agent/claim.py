@@ -1,37 +1,17 @@
 """The claim agent: works one claim from a clean start and reports in one line."""
 
 import json
-from collections.abc import Iterable, Iterator
 from typing import Any
 
-from langchain.agents import create_agent
-from langchain.agents.middleware import AgentMiddleware, ModelCallLimitMiddleware
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, ToolMessage
 
-from agent import api
+from agent import api, harness
 from agent.api import result
-from agent.model import model, retry
-from agent.tools import tools_for
+from agent.tools import CLAIM_TOOLS, ClaimContext
 
 MODEL_CALL_LIMIT = 25
 NO_DECISION = "it ended without a decision"
-
-
-def add_step(claim_id: str, thread_id: str, kind: str, text: str) -> None:
-    """Record one step on the claim, for the dashboard to show."""
-    result(api.add_step(claim_id, thread_id, kind, text))
-
-
-def messages(updates: Iterable[Any]) -> Iterator[AIMessage | ToolMessage]:
-    """Yield each new message from the model and tools nodes' updates.
-
-    The middleware's own nodes send updates too, but never messages.
-    """
-    for update in updates:
-        for node in ("model", "tools"):
-            if node in update:
-                yield from update[node]["messages"]
 
 
 def steps(message: AIMessage | ToolMessage) -> list[tuple[str, str]]:
@@ -51,32 +31,19 @@ def steps(message: AIMessage | ToolMessage) -> list[tuple[str, str]]:
 
 
 def work(
-    claim_id: str, thread_id: str, llm: BaseChatModel | None, instructions: str
+    claim: ClaimContext, thread_id: str, llm: BaseChatModel | None, instructions: str
 ) -> None:
     """Stream the agent on the claim, recording each step."""
-    middleware: list[AgentMiddleware[Any, None]] = [
-        retry(),
-        ModelCallLimitMiddleware(run_limit=MODEL_CALL_LIMIT, exit_behavior="error"),
-    ]
-    agent = create_agent(
-        llm or model(),
-        tools=tools_for(claim_id),
-        system_prompt=instructions,
-        middleware=middleware,
-    )
-    updates = agent.stream(
-        {"messages": [{"role": "user", "content": f"Decide claim {claim_id}."}]},
-        config={"configurable": {"thread_id": thread_id}},
-        stream_mode="updates",
-    )
-    for message in messages(updates):
+    agent = harness.Agent(instructions, CLAIM_TOOLS, MODEL_CALL_LIMIT)
+    task = f"Decide claim {claim.claim_id}."
+    for message in harness.stream(agent, task, claim, llm):
         for kind, text in steps(message):
-            add_step(claim_id, thread_id, kind, text)
+            result(api.add_step(claim.claim_id, thread_id, kind, text))
 
 
 def release(claim_id: str, thread_id: str, reason: str) -> str:
     """Record why the run failed and release the claim, which counts the failure."""
-    add_step(claim_id, thread_id, "error", f"The run failed: {reason}")
+    result(api.add_step(claim_id, thread_id, "error", f"The run failed: {reason}"))
     status = result(api.release_claim(claim_id))["status"]
     if status == "left_for_handler":
         return f"{claim_id}: failed twice ({reason}), left for a handler"
@@ -106,11 +73,13 @@ def run(claim_id: str, thread_id: str, llm: BaseChatModel | None = None) -> str:
     started = api.start_claim(claim_id, thread_id)
     if not started.is_success:
         return f"{claim_id}: not started ({started.json()['detail']})"
+    claim = started.json()
+    context = ClaimContext(claim_id, claim["policy_id"], claim["customer_id"])
     try:
-        work(claim_id, thread_id, llm, instructions)
+        work(context, thread_id, llm, instructions)
     except Exception as error:
         return release(claim_id, thread_id, str(error))
-    claim = result(api.get_claim(claim_id))
-    if claim["status"] == "in_progress":
+    decided = result(api.get_claim(claim_id))
+    if decided["status"] == "in_progress":
         return release(claim_id, thread_id, NO_DECISION)
-    return report(claim)
+    return report(decided)
