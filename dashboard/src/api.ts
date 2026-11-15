@@ -99,6 +99,23 @@ export interface Handler {
   role: string;
 }
 
+export type TodoStatus = "to_do" | "in_progress" | "done" | "left_for_handler";
+
+export interface Todo {
+  content: string;
+  status: TodoStatus;
+}
+
+export interface Run {
+  run_id: string;
+  cap: number;
+  status: "running" | "finished";
+  todos: Todo[];
+  summary: string | null;
+  started_at: string;
+  finished_at: string | null;
+}
+
 export interface Step {
   step_id: number;
   kind: StepKind;
@@ -111,13 +128,16 @@ export function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
+async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const { detail } = (await response.json()) as { detail: string };
     throw new Error(detail);
   }
   return (await response.json()) as T;
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  return parse<T>(await fetch(path, init));
 }
 
 function post<T>(path: string, body: unknown): Promise<T> {
@@ -142,3 +162,11 @@ export const runAgent = (id: string) =>
   post<{ thread_id: string }>(`/api/claims/${id}/agent-runs`, {});
 export const signOff = (id: string, handlerId: string) =>
   post<Claim>(`/api/claims/${id}/sign-off`, { handler_id: handlerId });
+export const runQueueAgent = (cap: number) =>
+  post<{ run_id: string }>("/api/queue/agent-runs", { cap });
+
+/** The queue agent's most recent run, or null before its first run. */
+export async function getLatestRun(): Promise<Run | null> {
+  const response = await fetch("/api/runs/latest");
+  return response.status === 404 ? null : parse<Run>(response);
+}

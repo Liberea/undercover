@@ -1,6 +1,7 @@
 import { listClaims, type ClaimSummary, type Status } from "./api";
 import { OUTCOME_LABELS, STATUS_LABELS, date, label, money } from "./format";
 import { usePolling } from "./hooks";
+import { QueueRun } from "./QueueRun";
 import { StatusPill } from "./StatusPill";
 
 const FLOW: Status[] = [
@@ -27,6 +28,9 @@ export function Queue() {
       {claims && (
         <>
           <Flow claims={claims} />
+          <QueueRun
+            waiting={claims.filter((c) => c.status === "waiting").length}
+          />
           <ClaimsTable claims={claims} />
         </>
       )}

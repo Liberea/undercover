@@ -30,8 +30,20 @@ export function money(amount: number): string {
   return dollars.format(amount);
 }
 
+const dayAndTime = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 export function date(iso: string): string {
   return day.format(new Date(iso));
+}
+
+/** A moment in the viewer's own time zone, such as "Nov 15, 10:50 AM". */
+export function moment(iso: string): string {
+  return dayAndTime.format(new Date(iso));
 }
 
 export function label(code: string): string {

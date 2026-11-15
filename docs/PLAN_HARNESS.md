@@ -199,10 +199,10 @@ New, changed and removed operations. Every operation keeps an `operation_id`, a 
 
 **Success criteria**
 
-- [ ] Vitest passes for the run card (items and status labels from a stubbed API, the summary once finished, and "No run yet.") and for the Work the queue request with the number chosen.
-- [ ] `npm run e2e` passes a test that plays a run through the API. It creates a run with a cap of 2 and writes two items to do, and the page shows them. It marks one in progress and then done, and the page follows. It finishes the run with a summary, and the page shows "Finished" and the summary.
-- [ ] In the browser with the Playwright MCP server, the queue page with the run card renders in dark and in light mode, with no horizontal scroll at 1280 px. I take a screenshot of each mode.
-- [ ] `npm run check:ts` passes with coverage at 80% or more.
+- [x] Vitest passes for the run card (items and status labels from a stubbed API, the summary once finished, and "No run yet.") and for the Work the queue request with the number chosen.
+- [x] `npm run e2e` passes a test that plays a run through the API. It creates a run with a cap of 2 and writes two items to do, and the page shows them. It marks one in progress and then done, and the page follows. It finishes the run with a summary, and the page shows "Finished" and the summary.
+- [x] In the browser with the Playwright MCP server, the queue page with the run card renders in dark and in light mode, with no horizontal scroll at 1280 px. I take a screenshot of each mode.
+- [x] `npm run check:ts` passes with coverage at 80% or more.
 
 ## Phase 5: The harness end to end with the real model
 
