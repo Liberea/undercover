@@ -15,6 +15,7 @@ test("the queue lists every claim and where it stands", async ({ page }) => {
     /Waiting$/,
     /In progress$/,
     /Waiting for sign-off$/,
+    /Left for a handler$/,
     /Decided$/,
   ]);
   const row = page.getByRole("row").filter({ hasText: "CLM-1001" });

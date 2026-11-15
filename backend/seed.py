@@ -26,7 +26,8 @@ def seed(path: Path) -> dict[str, int]:
     with closing(sqlite3.connect(path)) as connection, connection:
         connection.executescript(SCHEMA)
         connection.executemany(
-            "INSERT INTO claims VALUES (?, ?, ?, 'waiting', NULL, ?)",
+            "INSERT INTO claims (claim_id, policy_id, customer_id, status, data)"
+            " VALUES (?, ?, ?, 'waiting', ?)",
             [
                 (c["claim_id"], c["policy_id"], c["customer_id"], json.dumps(c))
                 for c in claims

@@ -5,7 +5,7 @@ import sys
 import uuid
 
 from agent.api import call
-from agent.main import run
+from agent.claim import run
 
 
 def waiting_claims() -> list[str]:
@@ -15,9 +15,9 @@ def waiting_claims() -> list[str]:
 
 
 def main(claim_ids: list[str]) -> None:
-    """Run the agent on each claim and print its reply."""
+    """Run the agent on each claim and print its one-line report."""
     for claim_id in claim_ids or waiting_claims():
-        print(f"{claim_id}: {run(claim_id, uuid.uuid4().hex)}", flush=True)
+        print(run(claim_id, uuid.uuid4().hex), flush=True)
 
 
 if __name__ == "__main__":

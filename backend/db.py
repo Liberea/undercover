@@ -18,7 +18,8 @@ CREATE TABLE claims (
     customer_id TEXT NOT NULL,
     status TEXT NOT NULL,
     thread_id TEXT,
-    data TEXT NOT NULL
+    data TEXT NOT NULL,
+    failures INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE policies (policy_id TEXT PRIMARY KEY, data TEXT NOT NULL);
 CREATE TABLE customers (customer_id TEXT PRIMARY KEY, data TEXT NOT NULL);

@@ -44,15 +44,40 @@ def test_start_claim(client):
     assert claim["thread_id"] == "t-1"
 
 
-def test_start_claim_again_after_a_failed_run(client):
+def release(client, claim_id):
+    return client.post(f"/api/claims/{claim_id}/release")
+
+
+def test_start_claim_only_when_waiting(client):
     start(client, "CLM-1001")
+    response = start(client, "CLM-1001")
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Claim CLM-1001 is in progress"}
+    decide(client, "CLM-1001", "decline", 0)
+    assert start(client, "CLM-1001").status_code == 409
+
+
+def test_first_failure_goes_back_to_the_queue(client):
+    start(client, "CLM-1001")
+    assert release(client, "CLM-1001").json()["status"] == "waiting"
     assert start(client, "CLM-1001").status_code == 200
 
 
-def test_release_claim(client):
+def test_second_failure_is_left_for_a_handler(client):
     start(client, "CLM-1001")
-    response = client.post("/api/claims/CLM-1001/release")
-    assert response.json()["status"] == "waiting"
+    release(client, "CLM-1001")
+    start(client, "CLM-1001")
+    assert release(client, "CLM-1001").json()["status"] == "left_for_handler"
+    response = start(client, "CLM-1001")
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Claim CLM-1001 is left for handler"}
+
+
+def test_a_decided_claim_cannot_be_decided_again(client):
+    approved(client, "CLM-1001", 420)
+    response = decide(client, "CLM-1001", "approve", 420)
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Claim CLM-1001 is decided"}
 
 
 def test_release_waiting_claim(client):

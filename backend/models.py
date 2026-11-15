@@ -4,7 +4,9 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
 
-Status = Literal["waiting", "in_progress", "waiting_for_sign_off", "decided"]
+Status = Literal[
+    "waiting", "in_progress", "waiting_for_sign_off", "decided", "left_for_handler"
+]
 Outcome = Literal["approve", "decline", "refer"]
 
 

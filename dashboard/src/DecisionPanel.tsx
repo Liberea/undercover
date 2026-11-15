@@ -9,6 +9,12 @@ import {
 import { OUTCOME_LABELS, money } from "./format";
 import { usePolling } from "./hooks";
 
+const UNDECIDED: Partial<Record<Claim["status"], string>> = {
+  in_progress: "The agent is working on this claim.",
+  left_for_handler:
+    "The agent failed on this claim twice, so it is left for a handler.",
+};
+
 export function DecisionPanel({ claim }: Readonly<{ claim: Claim }>) {
   const { decision } = claim;
   if (!decision) {
@@ -16,9 +22,8 @@ export function DecisionPanel({ claim }: Readonly<{ claim: Claim }>) {
       <section className="card section" aria-label="Decision">
         <h2>Decision</h2>
         <p className="muted">
-          {claim.status === "in_progress"
-            ? "The agent is working on this claim."
-            : "No decision yet. Run the agent to decide this claim."}
+          {UNDECIDED[claim.status] ??
+            "No decision yet. Run the agent to decide this claim."}
         </p>
       </section>
     );

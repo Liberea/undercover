@@ -1,4 +1,4 @@
-from agent import main as agent
+from agent import claim as agent
 
 STEP = {"thread_id": "t-1", "kind": "tool_call", "text": "get_claim"}
 

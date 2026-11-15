@@ -146,17 +146,17 @@ New, changed and removed operations. Every operation keeps an `operation_id`, a 
 
 **Success criteria**
 
-- [ ] Backend tests: a claim released once is `waiting`. Released a second time, it is `left_for_handler`. `start_claim` on a claim in progress, decided or left for a handler gives 409. Deciding a decided claim and paying twice still give 409.
-- [ ] Agent tests with stub models:
-  - [ ] A model that fails once and then works: the retry carries the run through, and the claim is decided.
-  - [ ] A model that always fails: `run` returns `CLM-1001: failed (The model is unavailable), back in the queue` without raising. The claim is waiting, and the error is a step. A second such run returns the "failed twice" line, and the claim is `left_for_handler`.
-  - [ ] A model that keeps calling tools without deciding is stopped by the call limit, and the run counts as a failure.
-  - [ ] A run that ends without a decision counts as a failure.
-  - [ ] The report lines for approved and paid, waiting for sign-off, declined and referred.
-  - [ ] `run` on a decided claim returns `not started (...)` and changes nothing.
-- [ ] Vitest passes for the new status's label and pill and for the queue's counts.
-- [ ] `npm run e2e` passes a test that releases a claim twice through the API. The queue and the claim page show it as "Left for a handler", and the claim page has no Run the agent button.
-- [ ] `npm run check:python` and `npm run check:ts` pass with coverage at 80% or more.
+- [x] Backend tests: a claim released once is `waiting`. Released a second time, it is `left_for_handler`. `start_claim` on a claim in progress, decided or left for a handler gives 409. Deciding a decided claim and paying twice still give 409.
+- [x] Agent tests with stub models:
+  - [x] A model that fails once and then works: the retry carries the run through, and the claim is decided.
+  - [x] A model that always fails: `run` returns `CLM-1001: failed (The model is unavailable), back in the queue` without raising. The claim is waiting, and the error is a step. A second such run returns the "failed twice" line, and the claim is `left_for_handler`.
+  - [x] A model that keeps calling tools without deciding is stopped by the call limit, and the run counts as a failure.
+  - [x] A run that ends without a decision counts as a failure.
+  - [x] The report lines for approved and paid, waiting for sign-off, declined and referred.
+  - [x] `run` on a decided claim returns `not started (...)` and changes nothing.
+- [x] Vitest passes for the new status's label and pill and for the queue's counts.
+- [x] `npm run e2e` passes a test that releases a claim twice through the API. The queue and the claim page show it as "Left for a handler", and the claim page has no Run the agent button.
+- [x] `npm run check:python` and `npm run check:ts` pass with coverage at 80% or more.
 
 ## Phase 3: The queue agent and its runs
 

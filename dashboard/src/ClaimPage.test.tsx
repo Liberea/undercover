@@ -94,6 +94,19 @@ it("shows the agent's steps while it works", async () => {
   expect(screen.queryByRole("button", { name: "Run the agent" })).toBeNull();
 });
 
+it("shows a claim left for a handler without a run button", async () => {
+  show(claim({ status: "left_for_handler" }), [
+    step("error", "The run failed: The model is unavailable", 1),
+  ]);
+  expect(
+    await screen.findByText(
+      "The agent failed on this claim twice, so it is left for a handler.",
+    ),
+  ).toBeDefined();
+  expect(screen.getByText("Left for a handler")).toBeDefined();
+  expect(screen.queryByRole("button", { name: "Run the agent" })).toBeNull();
+});
+
 it("lists the sections the agent read", async () => {
   const read = "Claims manual, 7. Interpretation notes\n\nThese notes record.";
   show(claim({ status: "in_progress" }), [

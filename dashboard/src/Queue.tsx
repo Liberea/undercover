@@ -7,6 +7,7 @@ const FLOW: Status[] = [
   "waiting",
   "in_progress",
   "waiting_for_sign_off",
+  "left_for_handler",
   "decided",
 ];
 

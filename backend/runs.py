@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import APIRouter, BackgroundTasks
 
-from agent import main as agent
+from agent import claim as agent
 from backend.claims import find_claim
 from backend.db import Db
 from backend.lifecycle import now, require_status

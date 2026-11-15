@@ -2,9 +2,9 @@ from agent import __main__ as cli
 
 
 def test_runs_the_claims_given(monkeypatch, capsys):
-    monkeypatch.setattr(cli, "run", lambda claim_id, _: f"Decided {claim_id}.")
+    monkeypatch.setattr(cli, "run", lambda claim_id, _: f"{claim_id}: declined")
     cli.main(["CLM-1001"])
-    assert capsys.readouterr().out == "CLM-1001: Decided CLM-1001.\n"
+    assert capsys.readouterr().out == "CLM-1001: declined\n"
 
 
 def test_works_through_the_waiting_claims(client, monkeypatch):

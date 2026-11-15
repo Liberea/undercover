@@ -1,5 +1,9 @@
 export type Status =
-  "waiting" | "in_progress" | "waiting_for_sign_off" | "decided";
+  | "waiting"
+  | "in_progress"
+  | "waiting_for_sign_off"
+  | "decided"
+  | "left_for_handler";
 export type Outcome = "approve" | "decline" | "refer";
 export type StepKind = "tool_call" | "tool_result" | "read" | "reply" | "error";
 

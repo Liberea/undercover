@@ -279,7 +279,8 @@ button {
   color: var(--mid);
 }
 
-.status-waiting_for_sign_off {
+.status-waiting_for_sign_off,
+.status-left_for_handler {
   color: var(--alert);
 }
 

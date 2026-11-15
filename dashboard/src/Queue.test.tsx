@@ -24,12 +24,13 @@ const CLAIMS = [
     outcome: "decline",
     payout: 0,
   }),
+  summary({ claim_id: "CLM-1004", status: "left_for_handler" }),
 ];
 
 it("lists each claim with its status and decision", async () => {
   stubApi({ "GET /api/claims": CLAIMS });
   render(<Queue />);
-  expect(await screen.findByText("3 claims")).toBeDefined();
+  expect(await screen.findByText("4 claims")).toBeDefined();
   const first = screen.getByRole("row", { name: /CLM-1001/ });
   expect(within(first).getByText("Trip delay")).toBeDefined();
   expect(within(first).getByText("Jun 24, 2026")).toBeDefined();
@@ -41,6 +42,8 @@ it("lists each claim with its status and decision", async () => {
   const third = screen.getByRole("row", { name: /CLM-1003/ });
   expect(within(third).getByText("Declined")).toBeDefined();
   expect(within(third).getByText("Emergency medical")).toBeDefined();
+  const fourth = screen.getByRole("row", { name: /CLM-1004/ });
+  expect(within(fourth).getByText("Left for a handler")).toBeDefined();
 });
 
 it("counts the claims in each state", async () => {
@@ -54,6 +57,7 @@ it("counts the claims in each state", async () => {
     "1 Waiting",
     "0 In progress",
     "1 Waiting for sign-off",
+    "1 Left for a handler",
     "1 Decided",
   ]);
 });

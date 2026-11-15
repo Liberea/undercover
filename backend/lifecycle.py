@@ -13,6 +13,7 @@ from backend.seed import load
 router = APIRouter(prefix="/api/claims")
 
 APPROVAL_LIMIT: float = load("company.json")["payout_approval_limit"]
+FAILURES_FOR_A_HANDLER = 2
 
 
 def now() -> str:
@@ -35,7 +36,7 @@ def set_status(db: sqlite3.Connection, claim_id: str, status: str) -> None:
 @router.post("/{claim_id}/start", operation_id="start_claim")
 def start_claim(claim_id: str, body: StartIn, db: Db) -> Claim:
     """Mark a waiting claim as in progress on the agent's thread."""
-    require_status(find_claim(db, claim_id), "waiting", "in_progress")
+    require_status(find_claim(db, claim_id), "waiting")
     db.execute(
         "UPDATE claims SET status = 'in_progress', thread_id = ? WHERE claim_id = ?",
         (body.thread_id, claim_id),
@@ -45,9 +46,15 @@ def start_claim(claim_id: str, body: StartIn, db: Db) -> Claim:
 
 @router.post("/{claim_id}/release", operation_id="release_claim")
 def release_claim(claim_id: str, db: Db) -> Claim:
-    """Put a claim in progress back in the queue as waiting."""
-    require_status(find_claim(db, claim_id), "in_progress")
-    set_status(db, claim_id, "waiting")
+    """Count a failed run: the claim goes back to waiting, or to a handler at two."""
+    row = find_claim(db, claim_id)
+    require_status(row, "in_progress")
+    failures = row["failures"] + 1
+    status = "left_for_handler" if failures >= FAILURES_FOR_A_HANDLER else "waiting"
+    db.execute(
+        "UPDATE claims SET status = ?, failures = ? WHERE claim_id = ?",
+        (status, failures, claim_id),
+    )
     return claim(find_claim(db, claim_id))
 
 
